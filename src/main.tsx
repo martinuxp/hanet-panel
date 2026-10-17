@@ -6,6 +6,11 @@ import { AuthProvider, useAuth } from '@/lib/auth'
 import { routeTree } from './routeTree.gen'
 import './index.css'
 
+// El panel es solo modo oscuro. Se fija acá también por si el HTML que lo
+// envuelve no conserva los atributos de <html> (por ejemplo, en la demo).
+document.documentElement.dataset.theme = 'dark'
+document.documentElement.classList.add('dark')
+
 const router = createRouter({ routeTree, context: { auth: undefined! } })
 
 declare module '@tanstack/react-router' {
