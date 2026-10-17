@@ -1,57 +1,17 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/dm-sans";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/inter";
+@import "./components/arc/foundation.css";
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'DM Sans Variable', sans-serif;
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
-}
+/* Componentes, tipografía, radios y motion: Arc (uiarc.dev).
+   Colores: solo los de HaNet (sistema de diseño "HaNet", tokens.json).
+   El panel es solo modo oscuro: <html data-theme="dark" class="dark">. */
 
 :root {
-    /* Sistema de diseño HaNet (artifact "HaNet", tokens.json). Prefijo hn-
-       para no chocar con los nombres de shadcn (--accent, --primary).
-       El panel es solo modo oscuro. */
     --hn-canvas: #282829;
     --hn-surface: #3c3b3e;
     --hn-surface-muted: #504f53;
@@ -61,93 +21,138 @@
     --hn-text-secondary: #dddde2;
     --hn-text-on-light: #282829;
     --hn-accent: #ef2274;
-    --hn-primary: #4c5a6f;
     --hn-primary-strong: #262d37;
-    --hn-control-container: #3c3b3e;
     --hn-control-active: #c7c6cf;
-    --hn-control-on-active: #282829;
     --hn-error-text: #ff8db5;
     --hn-accent-mint: #00c8b3;
     --hn-accent-yellow: #ffcc00;
-    --hn-field-placeholder: rgba(221, 221, 226, 0.4);
     --hn-border-glass: rgba(255, 255, 255, 0.15);
-    --hn-shadow-tab-bar: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    --hn-opacity-pressed: 0.84;
-    --hn-opacity-disabled: 0.5;
+    --hn-glow-top: #832768;
+    --hn-glow-center: #d32b4c;
 
-    /* Mapeo a shadcn, según la tabla "Panel" del README del sistema. */
+    --font-geist: "Geist Variable";
+    --font-inter: "Inter Variable";
+}
+
+/* Roles de Arc con valores HaNet. Mismo selector que foundation.css y
+   declarado después, así gana. */
+:root[data-theme="dark"],
+:root[data-theme="dark"][data-accent] {
     color-scheme: dark;
     --background: var(--hn-canvas);
+    --surface: var(--hn-surface);
+    --surface-raised: var(--hn-surface);
+    --surface-muted: var(--hn-surface-muted);
     --foreground: var(--hn-text-primary);
-    --card: var(--hn-surface);
-    --card-foreground: var(--hn-text-primary);
-    --popover: var(--hn-surface);
-    --popover-foreground: var(--hn-text-primary);
-    --primary: var(--hn-accent);
-    --primary-foreground: var(--hn-text-primary);
-    --secondary: var(--hn-surface-raised);
-    --secondary-foreground: var(--hn-text-primary);
-    --muted: var(--hn-surface-muted);
-    --muted-foreground: var(--hn-surface-soft);
-    --accent: var(--hn-surface-muted);
+    --text-secondary: var(--hn-text-secondary);
+    --text-muted: var(--hn-surface-soft);
+    --border: rgba(255, 255, 255, 0.1);
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-strong: var(--hn-border-glass);
+
+    --accent: var(--hn-accent);
+    --accent-strong: var(--hn-error-text);
+    --accent-subtle: rgba(239, 34, 116, 0.18);
     --accent-foreground: var(--hn-text-primary);
-    --destructive: var(--hn-error-text);
-    --border: oklch(1 0 0 / 10%);
-    --input: var(--hn-canvas);
-    --ring: var(--hn-accent);
-    --chart-1: var(--hn-accent);
-    --chart-2: var(--hn-surface-raised);
-    --chart-3: var(--hn-surface-soft);
-    --chart-4: var(--hn-accent-mint);
-    --chart-5: var(--hn-accent-yellow);
-    --radius: 1rem;
+
+    --control-on: var(--hn-accent);
+    --control-glyph: var(--hn-text-primary);
+    --control-track: var(--hn-surface-muted);
+    --control-track-hover: var(--hn-surface-raised);
+    --control-thumb: var(--hn-text-primary);
+    --control-thumb-on: var(--hn-text-primary);
+    --control-fill: var(--hn-accent);
+
+    --success: var(--hn-accent-mint);
+    --warning: var(--hn-accent-yellow);
+    --danger: var(--hn-error-text);
+
+    --series-1: var(--hn-accent);
+    --series-2: var(--hn-accent-mint);
+    --series-3: var(--hn-accent-yellow);
+    --series-4: var(--hn-surface-raised);
+
+    --arc-gradient-from: var(--hn-glow-top);
+    --arc-gradient-to: var(--hn-glow-center);
+    --arc-gradient-foreground: var(--hn-text-primary);
+
+    --focus-outline: var(--hn-control-active);
+
+    /* shadcn (solo lo usa el sidebar) apuntando a los mismos roles. */
+    --card: var(--surface);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface-raised);
+    --popover-foreground: var(--foreground);
+    --primary: var(--accent);
+    --primary-foreground: var(--accent-foreground);
+    --secondary: var(--surface-muted);
+    --secondary-foreground: var(--foreground);
+    --muted: var(--surface-muted);
+    --muted-foreground: var(--text-secondary);
+    --destructive: var(--danger);
+    --input: var(--border-strong);
+    --ring: var(--hn-control-active);
+    --radius: var(--radius-control);
     --sidebar: var(--hn-primary-strong);
-    --sidebar-foreground: var(--hn-text-primary);
-    --sidebar-primary: var(--hn-accent);
-    --sidebar-primary-foreground: var(--hn-text-primary);
-    --sidebar-accent: var(--hn-surface);
-    --sidebar-accent-foreground: var(--hn-text-primary);
-    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--accent);
+    --sidebar-primary-foreground: var(--accent-foreground);
+    --sidebar-accent: var(--accent-subtle);
+    --sidebar-accent-foreground: var(--foreground);
+    --sidebar-border: var(--border);
     --sidebar-ring: var(--hn-control-active);
 }
 
 @theme inline {
-    --color-hn-canvas: var(--hn-canvas);
-    --color-hn-surface: var(--hn-surface);
-    --color-hn-surface-muted: var(--hn-surface-muted);
-    --color-hn-surface-raised: var(--hn-surface-raised);
-    --color-hn-text-secondary: var(--hn-text-secondary);
-    --color-hn-control-active: var(--hn-control-active);
-    --color-hn-control-on-active: var(--hn-control-on-active);
-    --color-hn-accent: var(--hn-accent);
-    --color-hn-field-placeholder: var(--hn-field-placeholder);
-    --radius-hn-md: 16px;
-    --radius-hn-lg: 24px;
-    --radius-hn-xl: 32px;
+    --font-sans: var(--font-body);
+    --font-heading: var(--font-display);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-surface: var(--surface);
+    --color-surface-muted: var(--surface-muted);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-muted: var(--text-muted);
+    --color-border: var(--border);
+    --color-accent: var(--accent);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-destructive: var(--destructive);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
 }
-
-/* Escala de la app (DM Sans): lo grande se aprieta, lo chico queda en 0. */
-@utility text-large-title { font-size: 34px; line-height: 41px; font-weight: 500; letter-spacing: -1.7px; }
-@utility text-title1 { font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -1.1px; }
-@utility text-title2 { font-size: 24px; line-height: 29px; font-weight: 700; letter-spacing: -1.08px; }
-@utility text-title3 { font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -0.8px; }
-@utility text-headline { font-size: 16px; line-height: 20px; font-weight: 700; letter-spacing: -0.4px; }
-@utility text-body { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0; }
-@utility text-callout { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0; }
-@utility text-footnote { font-size: 13px; line-height: 18px; font-weight: 400; letter-spacing: 0; }
-@utility text-caption { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0; }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-    }
-  body {
-    @apply bg-background text-foreground text-body;
-    }
-  ::selection {
-    background: color-mix(in srgb, var(--hn-accent) 45%, transparent);
+    @apply border-border;
   }
-  html {
-    @apply font-sans;
-    }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    letter-spacing: var(--tracking-body);
+    line-height: var(--leading-body);
+  }
+  ::selection {
+    background: var(--accent-subtle);
+  }
 }

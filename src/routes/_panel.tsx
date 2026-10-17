@@ -1,6 +1,9 @@
 import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router'
-import { LogOut } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Lock, LogOut } from 'lucide-react'
+import { Avatar } from '@/components/arc/avatar/avatar'
+import { Button } from '@/components/arc/button/button'
+import { EmptyState } from '@/components/arc/empty-state/empty-state'
+import { HanetLogo } from '@/components/brand/logo'
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +17,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { HanetLogo, HanetMark } from '@/components/hanet/logo'
 import { useAuth } from '@/lib/auth'
 import { navItems } from '@/lib/nav'
 
@@ -30,18 +32,22 @@ function PanelLayout() {
 
   if (!role) {
     return (
-      <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-4 text-center">
-        <HanetMark className="h-10" />
-        <h1 className="text-title2 text-balance">Tu cuenta no tiene acceso al panel</h1>
-        <p className="max-w-md text-hn-text-secondary">
-          {user?.email} no tiene un rol con acceso al panel. El equipo HaNet asigna los roles desde el Panel HNT.
-        </p>
-        <Button variant="surface" onClick={logout}>
-          Cerrar sesión
-        </Button>
+      <main className="flex min-h-svh items-center justify-center px-4">
+        <EmptyState
+          icon={<Lock />}
+          title="Tu cuenta no tiene acceso al panel"
+          description={`${user?.email ?? 'Esta cuenta'} no tiene un rol de docente, directiva o equipo HaNet. El equipo HaNet asigna los roles desde el Panel HNT.`}
+          action={
+            <Button variant="secondary" onClick={logout}>
+              Cerrar sesión
+            </Button>
+          }
+        />
       </main>
     )
   }
+
+  const name = user?.displayName || user?.email || 'HaNet'
 
   return (
     <SidebarProvider>
@@ -51,12 +57,15 @@ function PanelLayout() {
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {navItems
                 .filter((item) => item.roles.includes(role))
                 .map((item) => (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton render={<Link to={item.to} activeOptions={{ exact: true }} />}>
+                    <SidebarMenuButton
+                      className="h-10 rounded-(--radius-control) px-3 text-(length:--text-sm) text-(--text-secondary) data-[status=active]:bg-sidebar-accent data-[status=active]:text-(--foreground) data-[status=active]:[&_svg]:text-(--accent)"
+                      render={<Link to={item.to} activeOptions={{ exact: true }} />}
+                    >
                       <item.icon />
                       <span>{item.label}</span>
                     </SidebarMenuButton>
@@ -66,20 +75,23 @@ function PanelLayout() {
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter className="gap-3 p-4">
-          <div className="flex flex-col gap-0.5 rounded-hn-md bg-sidebar-accent px-4 py-3">
-            <p className="truncate text-callout">{user?.email}</p>
-            <p className="text-caption text-hn-text-secondary">{role}</p>
+          <div className="flex items-center gap-3 px-1">
+            <Avatar name={name} size="sm" />
+            <div className="min-w-0">
+              <p className="truncate text-(length:--text-sm)">{user?.email}</p>
+              <p className="text-(length:--text-xs) text-(--text-muted)">{role}</p>
+            </div>
           </div>
-          <Button variant="surface" size="sm" onClick={logout}>
-            <LogOut /> Cerrar sesión
+          <Button variant="ghost" size="sm" onClick={logout}>
+            <LogOut className="size-4" /> Cerrar sesión
           </Button>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset>
-        <header className="flex h-16 items-center gap-2 px-4 md:hidden">
+      <SidebarInset className="bg-(--background)">
+        <header className="flex h-14 items-center px-4 md:hidden">
           <SidebarTrigger aria-label="Abrir menú" />
         </header>
-        <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-8 md:py-10">
+        <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-10 md:py-12">
           <Outlet />
         </div>
       </SidebarInset>

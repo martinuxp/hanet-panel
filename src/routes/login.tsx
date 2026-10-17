@@ -1,10 +1,11 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useEffect, useState, type FormEvent } from 'react'
-import { Button } from '@/components/ui/button'
-import { Field } from '@/components/hanet/field'
-import { HanetLogo } from '@/components/hanet/logo'
-import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
+import { Alert } from '@/components/arc/alert/alert'
+import { Button } from '@/components/arc/button/button'
+import { Input } from '@/components/arc/input/input'
+import { PasswordField } from '@/components/arc/password-field/password-field'
+import { HanetLogo } from '@/components/brand/logo'
 import { useAuth } from '@/lib/auth'
 import { auth } from '@/lib/firebase'
 
@@ -34,29 +35,38 @@ function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password)
     } catch {
-      setError('Correo o contraseña incorrectos.')
+      setError('El correo o la contraseña no coinciden. Revísalos e inténtalo de nuevo.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="gap-3">
+    <main className="flex min-h-svh items-center justify-center px-4 py-10">
+      <section className="flex w-full max-w-sm flex-col gap-6 rounded-(--radius-surface) bg-(--surface) p-8 shadow-(--shadow-raised)">
+        <div className="flex flex-col gap-3">
           <HanetLogo />
-          <CardDescription>Entra con tu HaNet ID de docente, directiva o equipo HaNet.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <Field id="email" label="Correo" type="email" autoComplete="email" placeholder="nombre@correo.cl" required value={email} onChange={(e) => setEmail(e.target.value)} invalid={!!error} />
-            <Field id="password" label="Contraseña" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} invalid={!!error} error={error} />
-            <Button type="submit" disabled={loading} className="mt-2">
-              {loading ? 'Entrando…' : 'Entrar'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          <h1 className="text-(length:--text-2xl) leading-tight font-medium tracking-tight">Entra al panel</h1>
+          <p className="text-(--text-secondary)">Usa tu HaNet ID de docente, directiva o equipo HaNet.</p>
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+          <Input label="Correo" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <PasswordField
+            label="Contraseña"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            messages={{ showPassword: 'Mostrar contraseña', hidePassword: 'Ocultar contraseña' }}
+          />
+          <Alert tone="danger" title="No pudimos iniciar tu sesión" open={!!error}>
+            {error}
+          </Alert>
+          <Button type="submit" size="lg" loading={loading}>
+            Entrar
+          </Button>
+        </form>
+      </section>
     </main>
   )
 }
