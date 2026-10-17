@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
+import { getFunctions } from 'firebase/functions'
 
 // Mismo proyecto que la app (hanetcl/services/firebase.ts). La config web de
 // Firebase es pública; la seguridad real vive en las reglas y en los claims.
@@ -18,3 +19,4 @@ const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const enrollmentDb = getFirestore(app, 'hn-enrollmentdata')
 export const calendarDb = getFirestore(app, 'hn-calendar')
+export const functions = getFunctions(app)

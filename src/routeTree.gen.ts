@@ -13,7 +13,9 @@ import { Route as PanelRouteImport } from './routes/_panel'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PanelIndexRouteImport } from './routes/_panel/index'
 import { Route as PanelCalendarioRouteImport } from './routes/_panel/calendario'
-import { Route as PanelInstitucionesRouteImport } from './routes/_panel/instituciones'
+import { Route as PanelInstitucionesRouteRouteImport } from './routes/_panel/instituciones/route'
+import { Route as PanelInstitucionesIndexRouteImport } from './routes/_panel/instituciones/index'
+import { Route as PanelInstitucionesInstitutionIdRouteImport } from './routes/_panel/instituciones/$institutionId'
 
 const PanelRoute = PanelRouteImport.update({
   id: '/_panel',
@@ -34,44 +36,73 @@ const PanelCalendarioRoute = PanelCalendarioRouteImport.update({
   path: '/calendario',
   getParentRoute: () => PanelRoute,
 } as any)
-const PanelInstitucionesRoute = PanelInstitucionesRouteImport.update({
+const PanelInstitucionesRouteRoute = PanelInstitucionesRouteRouteImport.update({
   id: '/instituciones',
   path: '/instituciones',
   getParentRoute: () => PanelRoute,
 } as any)
+const PanelInstitucionesIndexRoute = PanelInstitucionesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PanelInstitucionesRouteRoute,
+} as any)
+const PanelInstitucionesInstitutionIdRoute =
+  PanelInstitucionesInstitutionIdRouteImport.update({
+    id: '/$institutionId',
+    path: '/$institutionId',
+    getParentRoute: () => PanelInstitucionesRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PanelIndexRoute
   '/login': typeof LoginRoute
+  '/instituciones': typeof PanelInstitucionesRouteRouteWithChildren
   '/calendario': typeof PanelCalendarioRoute
-  '/instituciones': typeof PanelInstitucionesRoute
+  '/instituciones/$institutionId': typeof PanelInstitucionesInstitutionIdRoute
+  '/instituciones/': typeof PanelInstitucionesIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/calendario': typeof PanelCalendarioRoute
-  '/instituciones': typeof PanelInstitucionesRoute
   '/': typeof PanelIndexRoute
+  '/instituciones/$institutionId': typeof PanelInstitucionesInstitutionIdRoute
+  '/instituciones': typeof PanelInstitucionesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_panel': typeof PanelRouteWithChildren
   '/login': typeof LoginRoute
+  '/_panel/instituciones': typeof PanelInstitucionesRouteRouteWithChildren
   '/_panel/calendario': typeof PanelCalendarioRoute
-  '/_panel/instituciones': typeof PanelInstitucionesRoute
   '/_panel/': typeof PanelIndexRoute
+  '/_panel/instituciones/$institutionId': typeof PanelInstitucionesInstitutionIdRoute
+  '/_panel/instituciones/': typeof PanelInstitucionesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/calendario' | '/instituciones'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/instituciones'
+    | '/calendario'
+    | '/instituciones/$institutionId'
+    | '/instituciones/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/calendario' | '/instituciones' | '/'
+  to:
+    | '/login'
+    | '/calendario'
+    | '/'
+    | '/instituciones/$institutionId'
+    | '/instituciones'
   id:
     | '__root__'
     | '/_panel'
     | '/login'
-    | '/_panel/calendario'
     | '/_panel/instituciones'
+    | '/_panel/calendario'
     | '/_panel/'
+    | '/_panel/instituciones/$institutionId'
+    | '/_panel/instituciones/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -113,21 +144,51 @@ declare module '@tanstack/react-router' {
       id: '/_panel/instituciones'
       path: '/instituciones'
       fullPath: '/instituciones'
-      preLoaderRoute: typeof PanelInstitucionesRouteImport
+      preLoaderRoute: typeof PanelInstitucionesRouteRouteImport
       parentRoute: typeof PanelRoute
+    }
+    '/_panel/instituciones/': {
+      id: '/_panel/instituciones/'
+      path: '/'
+      fullPath: '/instituciones/'
+      preLoaderRoute: typeof PanelInstitucionesIndexRouteImport
+      parentRoute: typeof PanelInstitucionesRouteRoute
+    }
+    '/_panel/instituciones/$institutionId': {
+      id: '/_panel/instituciones/$institutionId'
+      path: '/$institutionId'
+      fullPath: '/instituciones/$institutionId'
+      preLoaderRoute: typeof PanelInstitucionesInstitutionIdRouteImport
+      parentRoute: typeof PanelInstitucionesRouteRoute
     }
   }
 }
 
+interface PanelInstitucionesRouteRouteChildren {
+  PanelInstitucionesInstitutionIdRoute: typeof PanelInstitucionesInstitutionIdRoute
+  PanelInstitucionesIndexRoute: typeof PanelInstitucionesIndexRoute
+}
+
+const PanelInstitucionesRouteRouteChildren: PanelInstitucionesRouteRouteChildren =
+  {
+    PanelInstitucionesInstitutionIdRoute: PanelInstitucionesInstitutionIdRoute,
+    PanelInstitucionesIndexRoute: PanelInstitucionesIndexRoute,
+  }
+
+const PanelInstitucionesRouteRouteWithChildren =
+  PanelInstitucionesRouteRoute._addFileChildren(
+    PanelInstitucionesRouteRouteChildren,
+  )
+
 interface PanelRouteChildren {
+  PanelInstitucionesRouteRoute: typeof PanelInstitucionesRouteRouteWithChildren
   PanelCalendarioRoute: typeof PanelCalendarioRoute
-  PanelInstitucionesRoute: typeof PanelInstitucionesRoute
   PanelIndexRoute: typeof PanelIndexRoute
 }
 
 const PanelRouteChildren: PanelRouteChildren = {
+  PanelInstitucionesRouteRoute: PanelInstitucionesRouteRouteWithChildren,
   PanelCalendarioRoute: PanelCalendarioRoute,
-  PanelInstitucionesRoute: PanelInstitucionesRoute,
   PanelIndexRoute: PanelIndexRoute,
 }
 
