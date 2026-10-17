@@ -21,16 +21,18 @@ npm run dev
 
 ## Roles
 
-El acceso depende del custom claim `role` del usuario en Firebase Auth
-(`admin` o `docente`). Una cuenta sin rol puede iniciar sesión pero ve una
-pantalla de "sin acceso". El rol lo asigna una Cloud Function del backend
-(pendiente en `hanetcl/functions`); el cliente nunca lo decide.
+El acceso depende de los claims `role` y `courseId` del token, los mismos que
+usa la app (los sincroniza `syncMyClaims` en `hanetcl/functions`). Los roles
+se asignan en el Panel HNT. `Estudiante` no entra al panel.
 
-| Ruta        | admin | docente |
-| ----------- | ----- | ------- |
-| `/`         | ✓     | ✓       |
-| `/vinculos` | ✓     |         |
-| `/eventos`  | ✓     | ✓       |
+| Ruta             | HNT | Admin | Profesor | Directiva | CEE |
+| ---------------- | --- | ----- | -------- | --------- | --- |
+| `/`              | ✓   | ✓     | ✓        | ✓         | ✓   |
+| `/instituciones` | ✓   |       |          |           |     |
+| `/calendario`    | ✓   | ✓     | ✓        | ✓         | ✓   |
+
+El panel no escribe directo en Firestore: usa las funciones del backend
+(`admin*` para HNT, `verifyCalendarEvent` para Profesor), igual que la app.
 
 ## Deploy
 

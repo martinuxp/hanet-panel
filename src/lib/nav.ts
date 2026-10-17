@@ -1,15 +1,19 @@
-import { CalendarCheck, LayoutDashboard, UserCheck, type LucideIcon } from 'lucide-react'
+import { Building2, CalendarCheck, LayoutDashboard, type LucideIcon } from 'lucide-react'
 import type { PanelRole } from '@/lib/auth'
 
 export type NavItem = {
-  to: '/' | '/vinculos' | '/eventos'
+  to: '/' | '/instituciones' | '/calendario'
   label: string
   icon: LucideIcon
   roles: PanelRole[]
 }
 
+export const STAFF_ROLES: PanelRole[] = ['HNT', 'Admin', 'Profesor', 'Directiva', 'CEE']
+
 export const navItems: NavItem[] = [
-  { to: '/', label: 'Inicio', icon: LayoutDashboard, roles: ['admin', 'docente'] },
-  { to: '/vinculos', label: 'Vínculos de RUT', icon: UserCheck, roles: ['admin'] },
-  { to: '/eventos', label: 'Eventos del curso', icon: CalendarCheck, roles: ['admin', 'docente'] },
+  { to: '/', label: 'Inicio', icon: LayoutDashboard, roles: STAFF_ROLES },
+  // Las funciones admin* del backend solo aceptan HNT.
+  { to: '/instituciones', label: 'Instituciones y miembros', icon: Building2, roles: ['HNT'] },
+  // Profesor verifica (verifyCalendarEvent); Directiva, CEE, Admin y HNT editan el Calendar.
+  { to: '/calendario', label: 'Calendario del curso', icon: CalendarCheck, roles: STAFF_ROLES },
 ]

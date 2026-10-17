@@ -59,6 +59,7 @@
     --hanet-text: #f9f9fa;
     --hanet-text-secondary: #dddde2;
     --hanet-accent: #ef2274;
+    --hanet-error-text: #ff8db5;
 
     color-scheme: dark;
     --background: var(--hanet-canvas);
@@ -75,7 +76,7 @@
     --muted-foreground: var(--hanet-soft);
     --accent: var(--hanet-surface-muted);
     --accent-foreground: var(--hanet-text);
-    --destructive: oklch(0.704 0.191 22.216);
+    --destructive: var(--hanet-error-text);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: var(--hanet-accent);

@@ -12,8 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PanelRouteImport } from './routes/_panel'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PanelIndexRouteImport } from './routes/_panel/index'
-import { Route as PanelEventosRouteImport } from './routes/_panel/eventos'
-import { Route as PanelVinculosRouteImport } from './routes/_panel/vinculos'
+import { Route as PanelCalendarioRouteImport } from './routes/_panel/calendario'
+import { Route as PanelInstitucionesRouteImport } from './routes/_panel/instituciones'
 
 const PanelRoute = PanelRouteImport.update({
   id: '/_panel',
@@ -29,48 +29,48 @@ const PanelIndexRoute = PanelIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PanelRoute,
 } as any)
-const PanelEventosRoute = PanelEventosRouteImport.update({
-  id: '/eventos',
-  path: '/eventos',
+const PanelCalendarioRoute = PanelCalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
   getParentRoute: () => PanelRoute,
 } as any)
-const PanelVinculosRoute = PanelVinculosRouteImport.update({
-  id: '/vinculos',
-  path: '/vinculos',
+const PanelInstitucionesRoute = PanelInstitucionesRouteImport.update({
+  id: '/instituciones',
+  path: '/instituciones',
   getParentRoute: () => PanelRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PanelIndexRoute
   '/login': typeof LoginRoute
-  '/eventos': typeof PanelEventosRoute
-  '/vinculos': typeof PanelVinculosRoute
+  '/calendario': typeof PanelCalendarioRoute
+  '/instituciones': typeof PanelInstitucionesRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/eventos': typeof PanelEventosRoute
-  '/vinculos': typeof PanelVinculosRoute
+  '/calendario': typeof PanelCalendarioRoute
+  '/instituciones': typeof PanelInstitucionesRoute
   '/': typeof PanelIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_panel': typeof PanelRouteWithChildren
   '/login': typeof LoginRoute
-  '/_panel/eventos': typeof PanelEventosRoute
-  '/_panel/vinculos': typeof PanelVinculosRoute
+  '/_panel/calendario': typeof PanelCalendarioRoute
+  '/_panel/instituciones': typeof PanelInstitucionesRoute
   '/_panel/': typeof PanelIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/eventos' | '/vinculos'
+  fullPaths: '/' | '/login' | '/calendario' | '/instituciones'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/eventos' | '/vinculos' | '/'
+  to: '/login' | '/calendario' | '/instituciones' | '/'
   id:
     | '__root__'
     | '/_panel'
     | '/login'
-    | '/_panel/eventos'
-    | '/_panel/vinculos'
+    | '/_panel/calendario'
+    | '/_panel/instituciones'
     | '/_panel/'
   fileRoutesById: FileRoutesById
 }
@@ -102,32 +102,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelIndexRouteImport
       parentRoute: typeof PanelRoute
     }
-    '/_panel/eventos': {
-      id: '/_panel/eventos'
-      path: '/eventos'
-      fullPath: '/eventos'
-      preLoaderRoute: typeof PanelEventosRouteImport
+    '/_panel/calendario': {
+      id: '/_panel/calendario'
+      path: '/calendario'
+      fullPath: '/calendario'
+      preLoaderRoute: typeof PanelCalendarioRouteImport
       parentRoute: typeof PanelRoute
     }
-    '/_panel/vinculos': {
-      id: '/_panel/vinculos'
-      path: '/vinculos'
-      fullPath: '/vinculos'
-      preLoaderRoute: typeof PanelVinculosRouteImport
+    '/_panel/instituciones': {
+      id: '/_panel/instituciones'
+      path: '/instituciones'
+      fullPath: '/instituciones'
+      preLoaderRoute: typeof PanelInstitucionesRouteImport
       parentRoute: typeof PanelRoute
     }
   }
 }
 
 interface PanelRouteChildren {
-  PanelEventosRoute: typeof PanelEventosRoute
-  PanelVinculosRoute: typeof PanelVinculosRoute
+  PanelCalendarioRoute: typeof PanelCalendarioRoute
+  PanelInstitucionesRoute: typeof PanelInstitucionesRoute
   PanelIndexRoute: typeof PanelIndexRoute
 }
 
 const PanelRouteChildren: PanelRouteChildren = {
-  PanelEventosRoute: PanelEventosRoute,
-  PanelVinculosRoute: PanelVinculosRoute,
+  PanelCalendarioRoute: PanelCalendarioRoute,
+  PanelInstitucionesRoute: PanelInstitucionesRoute,
   PanelIndexRoute: PanelIndexRoute,
 }
 

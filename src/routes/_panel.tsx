@@ -32,7 +32,7 @@ function PanelLayout() {
       <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-4 text-center">
         <h1 className="text-2xl font-semibold">Tu cuenta no tiene acceso al panel</h1>
         <p className="max-w-md text-muted-foreground">
-          {user?.email} todavía no tiene rol de admin o docente. Pídele a un administrador de HaNet que te lo asigne.
+          {user?.email} no tiene un rol con acceso al panel. El equipo HaNet asigna los roles desde el Panel HNT.
         </p>
         <Button variant="secondary" onClick={logout}>
           Cerrar sesión
