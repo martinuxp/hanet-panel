@@ -49,60 +49,104 @@
 }
 
 :root {
-    /* Paleta HaNet (hanetcl/constants/design-tokens.ts). El panel es solo modo oscuro. */
-    --hanet-canvas: #282829;
-    --hanet-surface: #3c3b3e;
-    --hanet-surface-muted: #504f53;
-    --hanet-surface-raised: #4c5a6f;
-    --hanet-primary-strong: #262d37;
-    --hanet-soft: #c7c6cf;
-    --hanet-text: #f9f9fa;
-    --hanet-text-secondary: #dddde2;
-    --hanet-accent: #ef2274;
-    --hanet-error-text: #ff8db5;
+    /* Sistema de diseño HaNet (artifact "HaNet", tokens.json). Prefijo hn-
+       para no chocar con los nombres de shadcn (--accent, --primary).
+       El panel es solo modo oscuro. */
+    --hn-canvas: #282829;
+    --hn-surface: #3c3b3e;
+    --hn-surface-muted: #504f53;
+    --hn-surface-raised: #4c5a6f;
+    --hn-surface-soft: #c7c6cf;
+    --hn-text-primary: #f9f9fa;
+    --hn-text-secondary: #dddde2;
+    --hn-text-on-light: #282829;
+    --hn-accent: #ef2274;
+    --hn-primary: #4c5a6f;
+    --hn-primary-strong: #262d37;
+    --hn-control-container: #3c3b3e;
+    --hn-control-active: #c7c6cf;
+    --hn-control-on-active: #282829;
+    --hn-error-text: #ff8db5;
+    --hn-accent-mint: #00c8b3;
+    --hn-accent-yellow: #ffcc00;
+    --hn-field-placeholder: rgba(221, 221, 226, 0.4);
+    --hn-border-glass: rgba(255, 255, 255, 0.15);
+    --hn-shadow-tab-bar: 0px 10px 20px rgba(0, 0, 0, 0.3);
+    --hn-opacity-pressed: 0.84;
+    --hn-opacity-disabled: 0.5;
 
+    /* Mapeo a shadcn, según la tabla "Panel" del README del sistema. */
     color-scheme: dark;
-    --background: var(--hanet-canvas);
-    --foreground: var(--hanet-text);
-    --card: var(--hanet-surface);
-    --card-foreground: var(--hanet-text);
-    --popover: var(--hanet-surface);
-    --popover-foreground: var(--hanet-text);
-    --primary: var(--hanet-accent);
-    --primary-foreground: var(--hanet-text);
-    --secondary: var(--hanet-surface-raised);
-    --secondary-foreground: var(--hanet-text);
-    --muted: var(--hanet-surface-muted);
-    --muted-foreground: var(--hanet-soft);
-    --accent: var(--hanet-surface-muted);
-    --accent-foreground: var(--hanet-text);
-    --destructive: var(--hanet-error-text);
+    --background: var(--hn-canvas);
+    --foreground: var(--hn-text-primary);
+    --card: var(--hn-surface);
+    --card-foreground: var(--hn-text-primary);
+    --popover: var(--hn-surface);
+    --popover-foreground: var(--hn-text-primary);
+    --primary: var(--hn-accent);
+    --primary-foreground: var(--hn-text-primary);
+    --secondary: var(--hn-surface-raised);
+    --secondary-foreground: var(--hn-text-primary);
+    --muted: var(--hn-surface-muted);
+    --muted-foreground: var(--hn-surface-soft);
+    --accent: var(--hn-surface-muted);
+    --accent-foreground: var(--hn-text-primary);
+    --destructive: var(--hn-error-text);
     --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: var(--hanet-accent);
-    --chart-1: var(--hanet-accent);
-    --chart-2: var(--hanet-surface-raised);
-    --chart-3: var(--hanet-soft);
-    --chart-4: var(--hanet-text-secondary);
-    --chart-5: var(--hanet-surface-muted);
+    --input: var(--hn-canvas);
+    --ring: var(--hn-accent);
+    --chart-1: var(--hn-accent);
+    --chart-2: var(--hn-surface-raised);
+    --chart-3: var(--hn-surface-soft);
+    --chart-4: var(--hn-accent-mint);
+    --chart-5: var(--hn-accent-yellow);
     --radius: 1rem;
-    --sidebar: var(--hanet-primary-strong);
-    --sidebar-foreground: var(--hanet-text);
-    --sidebar-primary: var(--hanet-accent);
-    --sidebar-primary-foreground: var(--hanet-text);
-    --sidebar-accent: var(--hanet-surface);
-    --sidebar-accent-foreground: var(--hanet-text);
+    --sidebar: var(--hn-primary-strong);
+    --sidebar-foreground: var(--hn-text-primary);
+    --sidebar-primary: var(--hn-accent);
+    --sidebar-primary-foreground: var(--hn-text-primary);
+    --sidebar-accent: var(--hn-surface);
+    --sidebar-accent-foreground: var(--hn-text-primary);
     --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: var(--hanet-accent);
+    --sidebar-ring: var(--hn-control-active);
 }
+
+@theme inline {
+    --color-hn-canvas: var(--hn-canvas);
+    --color-hn-surface: var(--hn-surface);
+    --color-hn-surface-muted: var(--hn-surface-muted);
+    --color-hn-surface-raised: var(--hn-surface-raised);
+    --color-hn-text-secondary: var(--hn-text-secondary);
+    --color-hn-control-active: var(--hn-control-active);
+    --color-hn-control-on-active: var(--hn-control-on-active);
+    --color-hn-accent: var(--hn-accent);
+    --color-hn-field-placeholder: var(--hn-field-placeholder);
+    --radius-hn-md: 16px;
+    --radius-hn-lg: 24px;
+    --radius-hn-xl: 32px;
+}
+
+/* Escala de la app (DM Sans): lo grande se aprieta, lo chico queda en 0. */
+@utility text-large-title { font-size: 34px; line-height: 41px; font-weight: 500; letter-spacing: -1.7px; }
+@utility text-title1 { font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -1.1px; }
+@utility text-title2 { font-size: 24px; line-height: 29px; font-weight: 700; letter-spacing: -1.08px; }
+@utility text-title3 { font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -0.8px; }
+@utility text-headline { font-size: 16px; line-height: 20px; font-weight: 700; letter-spacing: -0.4px; }
+@utility text-body { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0; }
+@utility text-callout { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0; }
+@utility text-footnote { font-size: 13px; line-height: 18px; font-weight: 400; letter-spacing: 0; }
+@utility text-caption { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0; }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
     }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-body;
     }
+  ::selection {
+    background: color-mix(in srgb, var(--hn-accent) 45%, transparent);
+  }
   html {
     @apply font-sans;
     }

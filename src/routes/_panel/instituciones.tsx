@@ -6,8 +6,8 @@ export const Route = createFileRoute('/_panel/instituciones')({
   },
   component: () => (
     <div className="flex flex-col gap-2">
-      <h1 className="text-3xl font-semibold">Instituciones y miembros</h1>
-      <p className="text-muted-foreground">
+      <h1 className="text-title1">Instituciones y miembros</h1>
+      <p className="text-hn-text-secondary">
         Próximamente: lo mismo que el Panel HNT de la app (instituciones, códigos de invitación, nóminas y roles).
       </p>
     </div>

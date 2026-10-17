@@ -9,8 +9,8 @@ function CalendarPage() {
   const { role, courseId } = useAuth()
   return (
     <div className="flex flex-col gap-2">
-      <h1 className="text-3xl font-semibold">Calendario del curso</h1>
-      <p className="text-muted-foreground">
+      <h1 className="text-title1">Calendario del curso</h1>
+      <p className="text-hn-text-secondary">
         {courseId ? `Curso: ${courseId}. ` : 'Tu cuenta no tiene un curso vinculado. '}
         {role === 'Profesor'
           ? 'Próximamente: confirmar los eventos que publica la directiva.'

@@ -2,9 +2,9 @@ import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Field } from '@/components/hanet/field'
+import { HanetLogo } from '@/components/hanet/logo'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { useAuth } from '@/lib/auth'
 import { auth } from '@/lib/firebase'
 
@@ -43,24 +43,15 @@ function LoginPage() {
   return (
     <main className="flex min-h-svh items-center justify-center p-4">
       <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">
-            HaNet <span className="text-primary">Panel</span>
-          </CardTitle>
-          <CardDescription>Acceso para administración y docentes.</CardDescription>
+        <CardHeader className="gap-3">
+          <HanetLogo />
+          <CardDescription>Entra con tu HaNet ID de docente, directiva o equipo HaNet.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Correo</Label>
-              <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" disabled={loading}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <Field id="email" label="Correo" type="email" autoComplete="email" placeholder="nombre@correo.cl" required value={email} onChange={(e) => setEmail(e.target.value)} invalid={!!error} />
+            <Field id="password" label="Contraseña" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} invalid={!!error} error={error} />
+            <Button type="submit" disabled={loading} className="mt-2">
               {loading ? 'Entrando…' : 'Entrar'}
             </Button>
           </form>

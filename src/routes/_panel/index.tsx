@@ -7,10 +7,11 @@ export const Route = createFileRoute('/_panel/')({
 })
 
 function HomePage() {
-  const { role } = useAuth()
+  const { user, role } = useAuth()
+  const name = user?.displayName?.split(' ')[0]
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-3xl font-semibold">Hola 👋</h1>
+      <h1 className="text-large-title">{name ? `Hola, ${name}` : 'Hola'}</h1>
       <div className="grid gap-4 md:grid-cols-2">
         {role === 'HNT' && (
           <Card>
