@@ -156,3 +156,26 @@
     background: var(--accent-subtle);
   }
 }
+
+/* El brillo de la app (components/events/event-glow.tsx): los dos tonos de
+   glow de HaNet bajan desde arriba y se apagan antes de la mitad. Da
+   temperatura sin teñir las superficies donde se lee. */
+.hn-atmosphere {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(70% 420px at 18% -80px, color-mix(in oklab, var(--hn-glow-top) 55%, transparent), transparent 70%),
+    radial-gradient(55% 360px at 82% -120px, color-mix(in oklab, var(--hn-glow-center) 30%, transparent), transparent 70%);
+  background-repeat: no-repeat;
+}
+
+@layer base {
+  html {
+    scrollbar-color: var(--hn-surface-muted) transparent;
+  }
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+  ::placeholder {
+    color: color-mix(in oklab, var(--hn-text-secondary) 72%, var(--hn-surface));
+  }
+}

@@ -1,12 +1,14 @@
 import { Users } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Alert } from '@/components/arc/alert/alert'
+import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import { Button } from '@/components/arc/button/button'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { EmptyState } from '@/components/arc/empty-state/empty-state'
 import { SearchField } from '@/components/arc/search-field/search-field'
 import { Select } from '@/components/arc/select/select'
+import SegmentedControl from '@/components/arc/segmented-control/segmented-control'
 import { Skeleton } from '@/components/arc/skeleton/skeleton'
 import { useAuth } from '@/lib/auth'
 import { describeError } from '@/lib/errors'
@@ -27,6 +29,14 @@ const ROLE_NOTES: Record<MemberRole, string> = {
 // La tabla crece de a una página; el buscador encuentra el resto.
 const PAGE_ROWS = 50
 
+type Filter = 'todas' | 'vinculadas' | 'sin-vincular' | 'bloqueadas'
+const FILTERS: Record<Filter, (member: Member) => boolean> = {
+  todas: () => true,
+  vinculadas: member => !!member.uid && !member.blocked,
+  'sin-vincular': member => !member.uid,
+  bloqueadas: member => !!member.blocked,
+}
+
 export function MembersPanel({ institution }: { institution: AdminInstitution }) {
   const { user } = useAuth()
   const [members, setMembers] = useState<Member[]>([])
@@ -35,6 +45,7 @@ export function MembersPanel({ institution }: { institution: AdminInstitution })
   const [error, setError] = useState<string | null>(null)
   const [attempt, setAttempt] = useState(0)
   const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState<Filter>('todas')
   const [visible, setVisible] = useState(PAGE_ROWS)
   const [selected, setSelected] = useState<Member | null>(null)
 
@@ -53,9 +64,9 @@ export function MembersPanel({ institution }: { institution: AdminInstitution })
 
   const filtered = useMemo(() => {
     const term = search.trim().toLocaleLowerCase('es')
-    if (!term) return members
-    return members.filter(member => `${member.fullName} ${member.curso} ${member.email} ${member.role ?? ''}`.toLocaleLowerCase('es').includes(term))
-  }, [members, search])
+    return members.filter(member => FILTERS[filter](member)
+      && (!term || `${member.fullName} ${member.curso} ${member.email} ${member.role ?? ''}`.toLocaleLowerCase('es').includes(term)))
+  }, [members, search, filter])
 
   const replace = (updated: Member) => {
     setMembers(list => list.map(member => (member.rut === updated.rut ? updated : member)))
@@ -76,23 +87,44 @@ export function MembersPanel({ institution }: { institution: AdminInstitution })
   }
 
   const linked = members.filter(member => member.uid).length
+  const count = (key: Filter) => members.filter(FILTERS[key]).length
+  const share = Math.round((linked / members.length) * 100)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
+      <section className="flex flex-col gap-3 rounded-(--radius-surface) bg-(--surface) p-5 shadow-(--shadow-raised)">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p><span className="font-heading text-(length:--text-2xl) font-medium tabular-nums">{share}%</span> <span className="text-(--text-secondary)">vinculó su HaNet ID</span></p>
+          <p className="text-(length:--text-sm) text-(--text-secondary) tabular-nums">
+            {linked.toLocaleString('es-CL')} de {plural(members.length, 'persona', 'personas')}{truncated ? ' · se muestran las primeras 1.000' : ''}
+          </p>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-(--surface-muted)" role="meter" aria-label="Personas vinculadas" aria-valuemin={0} aria-valuemax={members.length} aria-valuenow={linked}>
+          <div className="h-full rounded-full bg-(--accent) transition-[width] duration-(--duration-slow) ease-(--ease-enter)" style={{ width: `${share}%` }} />
+        </div>
+      </section>
+
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <p className="text-(--text-secondary)">
-          {linked.toLocaleString('es-CL')} de {plural(members.length, 'persona vinculó', 'personas vincularon')} su HaNet ID.
-          {truncated ? ' Se muestran las primeras 1.000.' : ''}
-        </p>
+        <SegmentedControl
+          label="Filtrar personas"
+          value={filter}
+          onValueChange={value => { setFilter(value as Filter); setVisible(PAGE_ROWS) }}
+          options={[
+            { value: 'todas', label: `Todas ${count('todas')}` },
+            { value: 'vinculadas', label: `Vinculadas ${count('vinculadas')}` },
+            { value: 'sin-vincular', label: `Sin vincular ${count('sin-vincular')}` },
+            { value: 'bloqueadas', label: `Bloqueadas ${count('bloqueadas')}` },
+          ]}
+        />
         <SearchField label="Buscar persona" value={search} onValueChange={value => { setSearch(value); setVisible(PAGE_ROWS) }} placeholder="Nombre, curso, correo o rol" className="w-full sm:w-72" />
       </div>
 
-      <div className="overflow-x-auto rounded-(--radius-surface) bg-(--surface) shadow-(--shadow-resting)">
+      <div className="overflow-x-auto rounded-(--radius-surface) bg-(--surface) shadow-(--shadow-raised)">
         <table className="w-full text-left">
-          <thead className="text-(length:--text-sm) text-(--text-secondary)">
+          <thead className="border-b border-(--border) text-(length:--text-sm) text-(--text-secondary)">
             <tr>
               <th scope="col" className="px-5 py-3 font-medium">Nombre</th>
-              <th scope="col" className="px-5 py-3 font-medium">Curso</th>
+              <th scope="col" className="hidden px-5 py-3 font-medium sm:table-cell">Curso</th>
               <th scope="col" className="hidden px-5 py-3 font-medium md:table-cell">Correo</th>
               <th scope="col" className="px-5 py-3 font-medium">Rol</th>
             </tr>
@@ -101,15 +133,25 @@ export function MembersPanel({ institution }: { institution: AdminInstitution })
             {filtered.slice(0, visible).map(member => {
               const isLinked = !!member.uid
               return (
-                <tr key={member.rut} className="border-t border-(--border-subtle)">
+                <tr
+                  key={member.rut}
+                  onClick={isLinked ? () => setSelected(member) : undefined}
+                  className={`border-t border-(--border-subtle) first:border-t-0 transition-colors duration-(--duration-fast) ${isLinked ? 'cursor-pointer hover:bg-(--surface-muted)' : ''}`}
+                >
                   <td className="px-5 py-3">
-                    {isLinked
-                      ? <button type="button" onClick={() => setSelected(member)} className="text-left font-medium hover:text-(--accent)">{member.fullName}</button>
-                      : <span className="text-(--text-muted)">{member.fullName}</span>}
+                    <span className="flex items-center gap-3">
+                      <Avatar name={member.fullName} size="sm" className={isLinked ? '' : 'opacity-60'} />
+                      <span className="flex min-w-0 flex-col">
+                        {isLinked
+                          ? <button type="button" onClick={event => { event.stopPropagation(); setSelected(member) }} className="text-left font-medium">{member.fullName}</button>
+                          : <span className="text-(--text-muted)">{member.fullName}</span>}
+                        <span className="text-(length:--text-sm) text-(--text-secondary) sm:hidden">{member.curso}</span>
+                      </span>
+                    </span>
                   </td>
-                  <td className="px-5 py-3 whitespace-nowrap text-(--text-secondary)">{member.curso}</td>
+                  <td className="hidden px-5 py-3 whitespace-nowrap text-(--text-secondary) sm:table-cell">{member.curso}</td>
                   <td className="hidden px-5 py-3 text-(--text-secondary) md:table-cell">{member.email}</td>
-                  <td className="px-5 py-3"><RoleBadge member={member} /></td>
+                  <td className="px-5 py-3 whitespace-nowrap"><RoleBadge member={member} /></td>
                 </tr>
               )
             })}
@@ -130,9 +172,10 @@ export function MembersPanel({ institution }: { institution: AdminInstitution })
 }
 
 function RoleBadge({ member }: { member: Member }) {
-  if (member.blocked) return <Badge tone="danger" size="sm">Bloqueada</Badge>
+  if (member.blocked) return <Badge tone="warning" size="sm">Bloqueada</Badge>
   if (!member.uid) return <span className="text-(length:--text-sm) text-(--text-muted)">Sin vincular</span>
-  return <Badge size="sm">{member.role}</Badge>
+  // Estudiante es lo común; los demás roles tienen permisos y se marcan.
+  return <Badge tone={member.role === 'Estudiante' ? 'neutral' : 'info'} size="sm">{member.role}</Badge>
 }
 
 type Confirm = 'block' | 'unlink' | null

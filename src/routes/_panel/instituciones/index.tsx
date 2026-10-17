@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Building2, ChevronRight } from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
 import { Alert } from '@/components/arc/alert/alert'
+import { Badge } from '@/components/arc/badge/badge'
 import { Button } from '@/components/arc/button/button'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { EmptyState } from '@/components/arc/empty-state/empty-state'
@@ -59,7 +60,7 @@ function InstitutionsPage() {
           {institutions.length > 5 && (
             <SearchField label="Buscar institución" value={search} onValueChange={setSearch} placeholder="Nombre o nombre completo" />
           )}
-          <ul className="flex flex-col overflow-hidden rounded-(--radius-surface) bg-(--surface) shadow-(--shadow-resting)">
+          <ul className="flex flex-col overflow-hidden rounded-(--radius-surface) bg-(--surface) shadow-(--shadow-raised)">
             {filtered.map(institution => (
               <li key={institution.id} className="border-b border-(--border-subtle) last:border-b-0">
                 <Link
@@ -70,9 +71,12 @@ function InstitutionsPage() {
                   <InstitutionMark institution={institution} />
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate font-medium">{institution.name}</span>
-                    <span className="truncate text-(length:--text-sm) text-(--text-secondary)">
-                      {plural(institution.rosterCount, 'persona', 'personas')} · {institution.hasInviteCode ? 'con código' : 'sin código'}
-                    </span>
+                    {!!institution.fullName && <span className="truncate text-(length:--text-sm) text-(--text-secondary)">{institution.fullName}</span>}
+                  </span>
+                  <span className="hidden items-center gap-2 sm:flex">
+                    {institution.rosterCount === 0 && <Badge tone="warning" size="sm">Nómina vacía</Badge>}
+                    {!institution.hasInviteCode && <Badge tone="warning" size="sm">Sin código</Badge>}
+                    {institution.rosterCount > 0 && <span className="w-28 text-right whitespace-nowrap text-(length:--text-sm) tabular-nums text-(--text-secondary)">{plural(institution.rosterCount, 'persona', 'personas')}</span>}
                   </span>
                   <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-(--text-muted) transition-transform duration-(--duration-fast) group-hover:translate-x-0.5 motion-reduce:transition-none" />
                 </Link>

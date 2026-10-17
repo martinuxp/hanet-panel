@@ -87,7 +87,7 @@ function PanelLayout() {
           </Button>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset className="bg-(--background)">
+      <SidebarInset className="hn-atmosphere">
         <header className="flex h-14 items-center px-4 md:hidden">
           <SidebarTrigger aria-label="Abrir menú" />
         </header>
