@@ -1,4 +1,5 @@
 import { httpsCallable } from 'firebase/functions'
+import { DEMO } from '@/lib/demo'
 import { functions } from '@/lib/firebase'
 
 // Port de hanetcl/services/hnt-admin-service.ts. Todo pasa por las funciones
@@ -45,7 +46,10 @@ export type Member = {
 }
 
 function call<Req, Res>(name: string) {
-  return async (data: Req) => (await httpsCallable<Req, Res>(functions, name)(data)).data
+  return async (data: Req): Promise<Res> => {
+    if (DEMO) return (await import('@/demo/backend')).demoCall(name, data) as Promise<Res>
+    return (await httpsCallable<Req, Res>(functions, name)(data)).data
+  }
 }
 
 export async function listInstitutions() {

@@ -5,11 +5,12 @@
 @import "@fontsource-variable/inter";
 @import "./components/arc/foundation.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Solo oscuro: las variantes dark: aplican siempre, haya o no clase .dark. */
+@custom-variant dark (&);
 
 /* Componentes, tipografía, radios y motion: Arc (uiarc.dev).
    Colores: solo los de HaNet (sistema de diseño "HaNet", tokens.json).
-   El panel es solo modo oscuro: <html data-theme="dark" class="dark">. */
+   El panel es solo modo oscuro, con o sin data-theme en <html>. */
 
 :root {
     --hn-canvas: #282829;
@@ -34,10 +35,12 @@
     --font-inter: "Inter Variable";
 }
 
-/* Roles de Arc con valores HaNet. Mismo selector que foundation.css y
-   declarado después, así gana. */
-:root[data-theme="dark"],
-:root[data-theme="dark"][data-accent] {
+/* Roles de Arc con valores HaNet. Mismo peso que los selectores de
+   foundation.css y declarado después, así gana. No depende de data-theme:
+   el panel es solo oscuro aunque alguien cambie ese atributo. */
+:root,
+:root[data-theme],
+:root[data-theme][data-accent] {
     color-scheme: dark;
     --background: var(--hn-canvas);
     --surface: var(--hn-surface);
@@ -93,7 +96,9 @@
     --input: var(--border-strong);
     --ring: var(--hn-control-active);
     --radius: var(--radius-control);
-    --sidebar: var(--hn-primary-strong);
+    /* Mismo gris que el fondo: el azul de primaryStrong chocaba con el gris
+       cálido del resto. Lo separa el borde. */
+    --sidebar: var(--background);
     --sidebar-foreground: var(--foreground);
     --sidebar-primary: var(--accent);
     --sidebar-primary-foreground: var(--accent-foreground);

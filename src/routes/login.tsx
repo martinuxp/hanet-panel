@@ -1,13 +1,11 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Alert } from '@/components/arc/alert/alert'
 import { Button } from '@/components/arc/button/button'
 import { Input } from '@/components/arc/input/input'
 import { PasswordField } from '@/components/arc/password-field/password-field'
 import { HanetLogo } from '@/components/brand/logo'
-import { useAuth } from '@/lib/auth'
-import { auth } from '@/lib/firebase'
+import { PANEL_ROLES, useAuth } from '@/lib/auth'
 
 export const Route = createFileRoute('/login')({
   beforeLoad: ({ context }) => {
@@ -18,7 +16,7 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, login, loginAs } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +31,7 @@ function LoginPage() {
     setError(null)
     setLoading(true)
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password)
+      await login(email.trim(), password)
     } catch {
       setError('El correo o la contraseña no coinciden. Revísalos e inténtalo de nuevo.')
     } finally {
@@ -66,6 +64,18 @@ function LoginPage() {
             Entrar
           </Button>
         </form>
+        {loginAs && (
+          <div className="flex flex-col gap-3 border-t border-(--border-subtle) pt-5">
+            <p className="text-(length:--text-sm) text-(--text-secondary)">Demo: entra con un rol, sin cuenta.</p>
+            <div className="flex flex-wrap gap-2">
+              {PANEL_ROLES.map(role => (
+                <Button key={role} variant="secondary" size="sm" onClick={() => loginAs(role)}>
+                  {role}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
     </main>
   )

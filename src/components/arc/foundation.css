@@ -79,7 +79,10 @@
   --duration-instant: 120ms; --duration-fast: 160ms; --duration-standard: 240ms; --duration-considered: 480ms; --duration-spring: 580ms;
 }
 
-:root[data-theme="dark"] {
+/* HaNet: el panel es solo oscuro. Aplica aunque el HTML que lo envuelve
+   cambie o borre data-theme (el visor de la demo pone "light"). */
+:root,
+:root[data-theme] {
   color-scheme: dark;
   --background: oklch(19% 0 0);
   --surface: oklch(21.5% 0 0);
