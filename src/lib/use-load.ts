@@ -22,5 +22,8 @@ export function useLoad<T>(load: () => Promise<T>, deps: unknown[], fallbackErro
     setAttempt(value => value + 1)
   }, [])
 
-  return { data, setData, error, retry }
+  /** Vuelve a pedir los datos sin vaciar la pantalla mientras llegan. */
+  const refresh = useCallback(() => setAttempt(value => value + 1), [])
+
+  return { data, setData, error, retry, refresh }
 }

@@ -1,5 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { ArrowDown, ArrowUp, Check, ExternalLink, FileText, Inbox, Link2, PartyPopper } from 'lucide-react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ArrowDown, ArrowUp, Check, ChevronDown, ExternalLink, FileText, Inbox, Link2, PartyPopper, Pencil, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert } from '@/components/arc/alert/alert'
 import { Avatar } from '@/components/arc/avatar/avatar'
@@ -9,10 +9,13 @@ import { EmptyState } from '@/components/arc/empty-state/empty-state'
 import SegmentedControl from '@/components/arc/segmented-control/segmented-control'
 import { Skeleton } from '@/components/arc/skeleton/skeleton'
 import { Textarea } from '@/components/arc/textarea/textarea'
+import { CopyButton } from '@/components/arc/copy-button/copy-button'
+import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { BackLink } from '@/components/docente/back-link'
+import { TaskDialog } from '@/components/docente/task-dialog'
 import {
-  DOCUMENT_LABELS, fileSize, getHallTask, reviewHallSubmission, shortDateTime,
-  type HallSubmission, type SubmissionItem,
+  deleteHallTask, DOCUMENT_LABELS, fileSize, getHallTask, reviewHallSubmission, shortDateTime,
+  type HallSubmission, type HallTaskDetail, type SubmissionItem,
 } from '@/lib/classhall'
 import { describeError } from '@/lib/errors'
 import { useLoad } from '@/lib/use-load'
@@ -32,8 +35,11 @@ function byQueue(a: HallSubmission, b: HallSubmission) {
 
 function ReviewPage() {
   const { hallId, taskId } = Route.useParams()
-  const { data, setData, error, retry } = useLoad(() => getHallTask(hallId, taskId), [hallId, taskId], 'No pudimos abrir esta tarea. Inténtalo nuevamente.')
+  const { data, setData, error, retry, refresh } = useLoad(() => getHallTask(hallId, taskId), [hallId, taskId], 'No pudimos abrir esta tarea. Inténtalo nuevamente.')
+  const navigate = useNavigate()
   const [filter, setFilter] = useState<Filter>('pendientes')
+  const [editing, setEditing] = useState(false)
+  const [removing, setRemoving] = useState(false)
   const [selectedUid, setSelectedUid] = useState<string | null>(null)
 
   const submissions = useMemo(() => [...(data?.submissions ?? [])].sort(byQueue), [data])
@@ -76,13 +82,35 @@ function ReviewPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4">
         {back}
-        <header className="flex flex-col gap-1">
-          <p className="text-(--text-secondary)">{data.subject}</p>
-          <h1 className="font-heading text-(length:--text-3xl) leading-(--leading-display) font-medium tracking-(--tracking-display) text-balance">{task.title}</h1>
-          <p className="text-(--text-secondary)">Hasta el {shortDateTime(task.dueAt)}{task.acceptLate ? ' · recibe atrasadas' : ''}</p>
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-(--text-secondary)">{data.subject}</p>
+            <h1 className="font-heading text-(length:--text-3xl) leading-(--leading-display) font-medium tracking-(--tracking-display) text-balance">{task.title}</h1>
+            <p className="text-(--text-secondary)">Hasta el {shortDateTime(task.dueAt)}{task.acceptLate ? ' · recibe atrasadas' : ''}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => setEditing(true)}><Pencil aria-hidden="true" className="size-4" /> Editar</Button>
+            <Button variant="danger" onClick={() => setRemoving(true)}><Trash2 aria-hidden="true" className="size-4" /> Eliminar</Button>
+          </div>
         </header>
+        {(task.instructions || data.attachment) && <TaskInfo detail={data} />}
         <Progress reviewed={reviewedCount} submitted={submissions.length} missing={missing} />
+        {data.missing && data.missing.length > 0 && <MissingList missing={data.missing} />}
       </div>
+
+      <TaskDialog hallId={hallId} task={task} attachment={data.attachment} open={editing} onOpenChange={setEditing} onSaved={refresh} />
+      <ConfirmDialog
+        open={removing}
+        onOpenChange={setRemoving}
+        title="¿Eliminar la tarea?"
+        description={`Se eliminan también ${submissions.length === 1 ? 'la entrega' : `las ${submissions.length} entregas`} y sus archivos, y sale del Calendar del curso. No se puede deshacer.`}
+        confirmLabel="Eliminar tarea"
+        failure="No pudimos eliminar la tarea. Inténtalo nuevamente."
+        onConfirm={async () => {
+          await deleteHallTask(hallId, taskId)
+          void navigate({ to: '/halls/$hallId', params: { hallId } })
+        }}
+      />
 
       {submissions.length === 0 ? (
         <EmptyState icon={<Inbox />} title="Nadie ha entregado todavía" description="Cuando lleguen entregas, las revisas aquí una tras otra." />
@@ -151,6 +179,50 @@ function ReviewPage() {
             <EmptyState icon={<PartyPopper />} title="Revisaste todas las entregas" description="Si llega otra, aparece en «Por revisar»." />
           )}
         </div>
+      )}
+    </div>
+  )
+}
+
+function TaskInfo({ detail }: { detail: HallTaskDetail }) {
+  const { task, attachment } = detail
+  return (
+    <div className="flex flex-col gap-3 rounded-(--radius-surface) bg-(--surface) p-5 shadow-(--shadow-raised)">
+      {task.instructions && <p className="whitespace-pre-line">{task.instructions}</p>}
+      {attachment && (
+        <a href={attachment.url} target="_blank" rel="noreferrer" className="flex w-fit max-w-full items-center gap-2.5 rounded-(--radius-control) border border-(--border) px-3 py-2 transition-colors duration-(--duration-fast) hover:bg-(--surface-muted)">
+          <FileText aria-hidden="true" className="size-4 shrink-0 text-(--accent)" />
+          <span className="truncate text-(length:--text-sm) font-medium">{attachment.name}</span>
+          <span className="shrink-0 text-(length:--text-xs) text-(--text-secondary)">{DOCUMENT_LABELS[attachment.kind]} · {fileSize(attachment.size)}</span>
+        </a>
+      )}
+    </div>
+  )
+}
+
+/** Quienes no han entregado: el docente se los recuerda en clase. */
+function MissingList({ missing }: { missing: NonNullable<HallTaskDetail['missing']> }) {
+  const [open, setOpen] = useState(false)
+  const showCourse = new Set(missing.map(item => item.courseId)).size > 1
+  const names = missing.map(item => (showCourse && item.courseId ? `${item.name} (${item.courseId})` : item.name))
+  return (
+    <div className="rounded-(--radius-surface) bg-(--surface) shadow-(--shadow-raised)">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3">
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen(value => !value)}
+          className="flex items-center gap-2 font-medium"
+        >
+          <ChevronDown aria-hidden="true" className={`size-4 text-(--text-secondary) transition-transform duration-(--duration-fast) motion-reduce:transition-none ${open ? '' : '-rotate-90'}`} />
+          Sin entregar ({missing.length})
+        </button>
+        <CopyButton value={names.join('\n')} label="Copiar nombres" />
+      </div>
+      {open && (
+        <ul className="grid gap-x-6 gap-y-1.5 border-t border-(--border-subtle) px-5 py-4 text-(length:--text-sm) sm:grid-cols-2 lg:grid-cols-3">
+          {names.map((name, index) => <li key={missing[index].uid} className="truncate">{name}</li>)}
+        </ul>
       )}
     </div>
   )

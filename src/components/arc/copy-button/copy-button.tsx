@@ -75,10 +75,10 @@ function MorphText({ text, reduced }: { text: string; reduced: boolean }) {
   </motion.span>;
 }
 
-export function CopyButton({ value, label = "Copy", className, iconOnly = false, variant = "outline", disabled, onCopied }: CopyButtonProps) {
+export function CopyButton({ value, label = "Copiar", className, iconOnly = false, variant = "outline", disabled, onCopied }: CopyButtonProps) {
   const { state, copy } = useCopyFeedback();
   const reduced = useReducedMotion() ?? false;
-  const text = state === "copied" ? "Copied" : state === "error" ? "Failed" : label;
+  const text = state === "copied" ? "Copiado" : state === "error" ? "No se copió" : label;
 
   async function handleCopy() {
     if (await copy(value)) onCopied?.();

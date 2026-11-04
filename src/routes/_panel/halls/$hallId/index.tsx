@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, CalendarClock, ClipboardList, FileText, Megaphone, Plus } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { ArrowRight, CalendarClock, ClipboardList, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Alert } from '@/components/arc/alert/alert'
 import { Badge } from '@/components/arc/badge/badge'
@@ -8,22 +8,32 @@ import { CopyButton } from '@/components/arc/copy-button/copy-button'
 import { EmptyState } from '@/components/arc/empty-state/empty-state'
 import { Skeleton } from '@/components/arc/skeleton/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/arc/tabs/tabs'
+import { AnnouncementsPanel } from '@/components/docente/announcements-panel'
 import { BackLink } from '@/components/docente/back-link'
+import { DocumentsPanel } from '@/components/docente/documents-panel'
 import { TaskDialog } from '@/components/docente/task-dialog'
 import {
-  DOCUMENT_LABELS, fileSize, getHall, hallThemeImage, PLAN_LABELS, shortDate, shortDateTime,
+  getHall, hallThemeImage, PLAN_LABELS, shortDateTime,
   type HallDetail, type HallTaskSummary,
 } from '@/lib/classhall'
 import { plural } from '@/lib/hnt-admin'
 import { useLoad } from '@/lib/use-load'
 
+const TABS = ['tareas', 'evaluaciones', 'documentos', 'avisos'] as const
+type Tab = (typeof TABS)[number]
+
 export const Route = createFileRoute('/_panel/halls/$hallId/')({
+  // La pestaña va en la dirección, para volver a ella desde una evaluación.
+  validateSearch: (search: Record<string, unknown>): { tab?: Tab } =>
+    TABS.includes(search.tab as Tab) ? { tab: search.tab as Tab } : {},
   component: HallPage,
 })
 
 function HallPage() {
   const { hallId } = Route.useParams()
-  const { data, error, retry } = useLoad(() => getHall(hallId), [hallId], 'No pudimos abrir este Hall. Inténtalo nuevamente.')
+  const { tab = 'tareas' } = Route.useSearch()
+  const navigate = Route.useNavigate()
+  const { data, error, retry, refresh } = useLoad(() => getHall(hallId), [hallId], 'No pudimos abrir este Hall. Inténtalo nuevamente.')
   const back = <BackLink to="/halls">Mis Halls</BackLink>
 
   if (error) {
@@ -65,17 +75,17 @@ function HallPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="tareas">
+      <Tabs value={tab} onValueChange={value => void navigate({ search: { tab: value as Tab }, replace: true })}>
         <TabsList aria-label="Secciones del Hall">
           <TabsTrigger value="tareas">Tareas</TabsTrigger>
           <TabsTrigger value="evaluaciones">Evaluaciones</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="avisos">Avisos</TabsTrigger>
         </TabsList>
-        <TabsContent value="tareas"><TasksPanel detail={data} onChanged={retry} /></TabsContent>
+        <TabsContent value="tareas"><TasksPanel detail={data} onChanged={refresh} /></TabsContent>
         <TabsContent value="evaluaciones"><EvaluationsPanel detail={data} /></TabsContent>
-        <TabsContent value="documentos"><DocumentsPanel detail={data} /></TabsContent>
-        <TabsContent value="avisos"><AnnouncementsPanel detail={data} /></TabsContent>
+        <TabsContent value="documentos"><DocumentsPanel detail={data} onChanged={refresh} /></TabsContent>
+        <TabsContent value="avisos"><AnnouncementsPanel detail={data} onChanged={refresh} /></TabsContent>
       </Tabs>
     </div>
   )
@@ -93,7 +103,7 @@ function TasksPanel({ detail, onChanged }: { detail: HallDetail; onChanged: () =
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-(--text-secondary)">Abre una tarea para revisar sus entregas una tras otra.</p>
+        <p className="text-(--text-secondary)">Abre una tarea para revisar sus entregas una tras otra, o para editarla.</p>
         <Button onClick={() => setCreating(true)}><Plus aria-hidden="true" className="size-4" /> Nueva tarea</Button>
       </div>
       {tasks.length === 0 ? (
@@ -123,6 +133,7 @@ function TaskRow({ hallId, task, expected, now }: { hallId: string; task: HallTa
           <span className="flex min-w-0 items-center gap-2">
             <span className="truncate font-medium">{task.title}</span>
             {open ? <Badge size="sm" tone="info">Abierta</Badge> : <Badge size="sm">Cerrada</Badge>}
+            {(task.pendingReviewCount ?? 0) > 0 && <Badge size="sm">{task.pendingReviewCount} por revisar</Badge>}
           </span>
           <span className="text-(length:--text-sm) text-(--text-secondary)">
             Hasta el {shortDateTime(task.dueAt)}{task.acceptLate ? ' · recibe atrasadas' : ''}
@@ -148,76 +159,52 @@ function TaskRow({ hallId, task, expected, now }: { hallId: string; task: HallTa
 
 function EvaluationsPanel({ detail }: { detail: HallDetail }) {
   const evaluations = [...detail.evaluations].sort((a, b) => a.date - b.date)
-  if (evaluations.length === 0) {
-    return <EmptyState icon={<CalendarClock />} title="Sin evaluaciones" description="Agenda evaluaciones desde la app. Salen aquí y en el Calendar del curso." />
-  }
+  const hallId = detail.hall.id
+  const navigate = useNavigate()
+  const [now] = useState(() => Date.now())
   return (
-    <ul className={listClass}>
-      {evaluations.map(evaluation => {
-        const total = evaluation.contents.reduce((sum, row) => sum + row.points.reduce((a, b) => a + b, 0), 0)
-        return (
-          <li key={evaluation.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-            <span className="flex min-w-0 flex-col gap-1">
-              <span className="font-medium">{evaluation.title}</span>
-              <span className="text-(length:--text-sm) text-(--text-secondary)">
-                {[shortDate(evaluation.date), evaluation.objectives.map(item => item.code).join(', ') || null].filter(Boolean).join(' · ')}
-              </span>
-            </span>
-            <span className="flex items-center gap-2">
-              {total > 0 && <Badge size="sm">{total} puntos</Badge>}
-              {evaluation.exigency != null && <Badge size="sm">Exigencia {evaluation.exigency}%</Badge>}
-            </span>
-          </li>
-        )
-      })}
-    </ul>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-(--text-secondary)">Salen en el Hall y en el Calendar del curso. Puedes llenarlas desde la T.E.</p>
+        <Button onClick={() => void navigate({ to: '/halls/$hallId/evaluaciones/$evaluationId', params: { hallId, evaluationId: 'nueva' } })}>
+          <Plus aria-hidden="true" className="size-4" /> Nueva evaluación
+        </Button>
+      </div>
+      {evaluations.length === 0 ? (
+        <EmptyState icon={<CalendarClock />} title="Sin evaluaciones" description="Agenda una evaluación y sube su tabla de especificaciones." />
+      ) : (
+        <ul className={listClass}>
+          {evaluations.map(evaluation => {
+            const total = evaluation.contents.reduce((sum, row) => sum + row.points.reduce((a, b) => a + b, 0), 0)
+            const hasSpec = (detail.documents ?? []).some(document => document.evaluationId === evaluation.id)
+            return (
+              <li key={evaluation.id}>
+                <Link
+                  to="/halls/$hallId/evaluaciones/$evaluationId"
+                  params={{ hallId, evaluationId: evaluation.id }}
+                  className="group flex flex-wrap items-center justify-between gap-3 px-5 py-4 transition-colors duration-(--duration-fast) hover:bg-(--surface-muted)"
+                >
+                  <span className="flex min-w-0 flex-col gap-1">
+                    <span className="flex items-center gap-2">
+                      <span className="truncate font-medium">{evaluation.title}</span>
+                      {evaluation.date < now && <Badge size="sm">Pasada</Badge>}
+                    </span>
+                    <span className="text-(length:--text-sm) text-(--text-secondary)">
+                      {[shortDateTime(evaluation.date), evaluation.objectives.map(item => item.code).filter(Boolean).join(', ') || null].filter(Boolean).join(' · ')}
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    {total > 0 && <Badge size="sm">{total} puntos</Badge>}
+                    {evaluation.exigency != null && <Badge size="sm">Exigencia {evaluation.exigency}%</Badge>}
+                    {!hasSpec && <Badge size="sm" tone="warning">Sin T.E.</Badge>}
+                    <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-(--text-muted) transition-transform duration-(--duration-fast) group-hover:translate-x-0.5 group-hover:text-(--accent) motion-reduce:transition-none" />
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
   )
 }
-
-function DocumentsPanel({ detail }: { detail: HallDetail }) {
-  const documents = detail.documents ?? []
-  if (documents.length === 0) {
-    return <EmptyState icon={<FileText />} title="Sin documentos" description="Las guías, presentaciones y PDF que compartas aparecen aquí." />
-  }
-  return (
-    <ul className={listClass}>
-      {documents.map(document => (
-        <li key={document.id}>
-          <a
-            href={document.url}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-3 px-5 py-4 transition-colors duration-(--duration-fast) hover:bg-(--surface-muted)"
-          >
-            <FileText aria-hidden="true" className="size-5 shrink-0 text-(--accent)" />
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate font-medium">{document.name}</span>
-              <span className="text-(length:--text-sm) text-(--text-secondary)">
-                {[DOCUMENT_LABELS[document.kind], fileSize(document.size), document.evaluationId ? 'Tabla de especificaciones' : document.taskId ? 'Material de tarea' : null].filter(Boolean).join(' · ')}
-              </span>
-            </span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-function AnnouncementsPanel({ detail }: { detail: HallDetail }) {
-  if (detail.announcements.length === 0) {
-    return <EmptyState icon={<Megaphone />} title="Sin avisos" description="Lo que publiques en el Hall lo ven todos sus estudiantes." />
-  }
-  return (
-    <ul className={listClass}>
-      {detail.announcements.map(item => (
-        <li key={item.id} className="flex flex-col gap-2 px-5 py-4">
-          <p className="whitespace-pre-line">{item.body}</p>
-          <p className="text-(length:--text-sm) text-(--text-secondary)">
-            {item.authorName}{item.createdAt ? ` · ${shortDate(item.createdAt)}` : ''}
-          </p>
-        </li>
-      ))}
-    </ul>
-  )
-}
-

@@ -1,5 +1,9 @@
 // ClassHall falso del modo demo: Halls, tareas y entregas inventadas.
-import type { Hall, HallDetail, HallSubmission, HallTaskDetail, HallTaskSummary, SubmissionItem } from '@/lib/classhall'
+import type {
+  Hall, HallAnnouncement, HallDetail, HallDocument, HallDocumentKind, HallEvaluation, HallSubmission, HallTaskDetail,
+  HallTaskSummary, SpecTableDraft, SubmissionItem,
+} from '@/lib/classhall'
+import { fileType } from '@/lib/uploads'
 
 // Plazos a las 23:59, como los pone un docente.
 const endOfToday = new Date().setHours(23, 59, 0, 0)
@@ -74,7 +78,60 @@ tasks[2].submissions = submissionsFor('Tercero Medio A', 7, tasks[2].dueAt, 0)
 tasks[3].submissions = submissionsFor('Tercero Medio B', 15, tasks[3].dueAt, 9)
 
 function summary({ submissions, hallId: _hallId, ...task }: TaskStore): HallTaskSummary {
-  return { ...task, submittedCount: submissions.length }
+  return { ...task, submittedCount: submissions.length, pendingReviewCount: submissions.filter(item => !item.reviewed).length }
+}
+
+const TEACHER = 'Paula Sepúlveda'
+
+const announcements: Record<string, HallAnnouncement[]> = {
+  'mat-2k': [
+    { id: 'a1', body: 'Mañana traigan calculadora y regla. Vemos gráficos de funciones.', authorName: TEACHER, createdAt: now - day, updatedAt: null },
+    { id: 'a2', body: 'Subí la guía 4. Tienen hasta el viernes, y la reviso el fin de semana.', authorName: TEACHER, createdAt: now - 5 * day, updatedAt: null },
+  ],
+}
+
+const evaluations: Record<string, HallEvaluation[]> = Object.fromEntries(halls.map(hall => [hall.id, hall.nextEvaluation
+  ? [{
+      id: `e-${hall.id}`, title: hall.nextEvaluation.title, date: hall.nextEvaluation.date, exigency: 60,
+      skills: ['Conocimiento', 'Aplicación', 'Análisis'],
+      contents: [{ name: 'Función lineal', detail: 'Pendiente e intercepto', points: [6, 8, 4] }, { name: 'Función afín', detail: '', points: [4, 8, 6] }],
+      objectives: [{ code: 'OA 3', text: 'Mostrar que comprenden la función afín.' }, { code: 'OA 4', text: '' }],
+      prep: 'Guías 3 y 4.', authorName: TEACHER, updatedAt: null,
+    }]
+  : []]))
+
+const documents: Record<string, HallDocument[]> = {
+  'mat-2k': [
+    { id: 'd1', name: 'Guía 4 - Funciones lineales.pdf', kind: 'pdf', size: 820_000, url: '#', authorName: TEACHER, announcementId: null, evaluationId: null, taskId: 'guia-4', createdAt: now - 5 * day },
+    { id: 'd2', name: 'Clase 12 - Pendiente.pptx', kind: 'powerpoint', size: 3_400_000, url: '#', authorName: TEACHER, announcementId: null, evaluationId: null, createdAt: now - 8 * day },
+    { id: 'd3', name: 'T.E. Prueba de funciones.pdf', kind: 'pdf', size: 210_000, url: '#', authorName: TEACHER, announcementId: null, evaluationId: 'e-mat-2k', createdAt: now - 2 * day },
+  ],
+}
+
+// Lo que "sube" la demo: el archivo se queda en el navegador.
+const staged = new Map<string, File>()
+let counter = 0
+
+export function demoStage(file: File) {
+  const uploadPath = `demo-uploads/${++counter}`
+  staged.set(uploadPath, file)
+  return { uploadPath, name: file.name }
+}
+
+const KIND_BY_TYPE: Record<string, HallDocumentKind> = {
+  'application/pdf': 'pdf',
+  'application/msword': 'word',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'word',
+  'application/vnd.ms-powerpoint': 'powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'powerpoint',
+  'application/vnd.ms-excel': 'excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'excel',
+  'image/jpeg': 'image',
+  'image/png': 'image',
+}
+
+function newId(prefix: string) {
+  return `${prefix}-${++counter}`
 }
 
 function notFound(message: string): never {
@@ -93,28 +150,9 @@ export function classhallCall(name: string, input: Data): unknown {
         hall: { ...hall },
         expectedSubmissions: hall.memberCount,
         tasks: tasks.filter(task => task.hallId === hall.id).map(summary),
-        announcements: hall.id === 'mat-2k'
-          ? [
-              { id: 'a1', body: 'Mañana traigan calculadora y regla. Vemos gráficos de funciones.', authorName: hall.teacherName, createdAt: now - day, updatedAt: null },
-              { id: 'a2', body: 'Subí la guía 4. Tienen hasta el viernes, y la reviso el fin de semana.', authorName: hall.teacherName, createdAt: now - 5 * day, updatedAt: null },
-            ]
-          : [],
-        evaluations: hall.nextEvaluation
-          ? [{
-              id: 'e1', title: hall.nextEvaluation.title, date: hall.nextEvaluation.date, exigency: 60,
-              skills: ['Conocimiento', 'Aplicación', 'Análisis'],
-              contents: [{ name: 'Función lineal', detail: '', points: [6, 8, 4] }, { name: 'Función afín', detail: '', points: [4, 8, 6] }],
-              objectives: [{ code: 'OA 3', text: '' }, { code: 'OA 4', text: '' }],
-              prep: 'Guías 3 y 4.', authorName: hall.teacherName, updatedAt: null,
-            }]
-          : [],
-        documents: hall.id === 'mat-2k'
-          ? [
-              { id: 'd1', name: 'Guía 4 - Funciones lineales.pdf', kind: 'pdf', size: 820_000, url: '#', authorName: hall.teacherName, announcementId: null, evaluationId: null, taskId: 'guia-4', createdAt: now - 5 * day },
-              { id: 'd2', name: 'Clase 12 - Pendiente.pptx', kind: 'powerpoint', size: 3_400_000, url: '#', authorName: hall.teacherName, announcementId: null, evaluationId: null, createdAt: now - 8 * day },
-              { id: 'd3', name: 'T.E. Prueba de funciones.pdf', kind: 'pdf', size: 210_000, url: '#', authorName: hall.teacherName, announcementId: null, evaluationId: 'e1', createdAt: now - 2 * day },
-            ]
-          : [],
+        announcements: [...(announcements[hall.id] ?? [])],
+        evaluations: [...(evaluations[hall.id] ?? [])].sort((a, b) => a.date - b.date),
+        documents: [...(documents[hall.id] ?? [])],
       }
       return detail
     }
@@ -123,12 +161,23 @@ export function classhallCall(name: string, input: Data): unknown {
       const task = tasks.find(item => item.hallId === hall.id && item.id === input.taskId) ?? notFound('No encontramos esa tarea.')
       const { submissions, hallId: _hallId, ...rest } = task
       const detail: HallTaskDetail = {
-        task: rest, attachment: null, subject: hall.subject, isTeacher: true,
+        task: rest, subject: hall.subject, isTeacher: true,
         submissions: submissions.map(item => ({ ...item })), expectedSubmissions: hall.memberCount ?? undefined,
+        attachment: (documents[hall.id] ?? []).find(item => item.taskId === task.id) ?? null,
+        missing: STUDENTS.slice(submissions.length)
+          .concat(['Pablo Aguilera Neira', 'Martina Cifuentes Lara', 'Felipe Duarte Rivas', 'Javiera Fierro Montt', 'Ignacio Gálvez Sáez', 'Constanza Hidalgo Mora', 'Alonso Inostroza Paz', 'Rafaela Jiménez Ulloa'])
+          .slice(0, Math.max(0, (hall.memberCount ?? 0) - submissions.length))
+          .map((name, index) => ({ uid: `falta-${index}`, name, courseId: hall.courseId }))
+          .sort((a, b) => a.name.localeCompare(b.name, 'es')),
       }
       return detail
     }
     case 'saveHallTask': {
+      const existing = tasks.find(item => item.hallId === input.hallId && item.id === input.taskId)
+      if (existing) {
+        Object.assign(existing, { title: String(input.title), instructions: String(input.instructions ?? ''), dueAt: Number(input.dueAt), acceptLate: Boolean(input.acceptLate), updatedAt: Date.now() })
+        return { taskId: existing.id }
+      }
       const id = `tarea-${tasks.length + 1}`
       tasks.push({
         hallId: String(input.hallId), id, title: String(input.title), instructions: String(input.instructions ?? ''),
@@ -144,6 +193,82 @@ export function classhallCall(name: string, input: Data): unknown {
       submission.feedback = String(input.feedback ?? '')
       submission.reviewedAt = submission.reviewed ? Date.now() : null
       return { ...submission }
+    }
+    case 'deleteHallTask': {
+      const index = tasks.findIndex(item => item.hallId === input.hallId && item.id === input.taskId)
+      if (index >= 0) tasks.splice(index, 1)
+      documents[String(input.hallId)] = (documents[String(input.hallId)] ?? []).filter(item => item.taskId !== input.taskId)
+      return { ok: true }
+    }
+    case 'attachHallDocument': {
+      const file = staged.get(String(input.uploadPath)) ?? notFound('No encontramos el archivo subido.')
+      staged.delete(String(input.uploadPath))
+      const list = (documents[String(input.hallId)] ??= [])
+      const owner = (['announcementId', 'evaluationId', 'taskId'] as const).find(key => input[key])
+      if (owner) documents[String(input.hallId)] = list.filter(item => item[owner] !== input[owner])
+      const document: HallDocument = {
+        id: newId('doc'), name: String(input.name || file.name), kind: KIND_BY_TYPE[fileType(file)] ?? 'file', size: file.size,
+        url: URL.createObjectURL(file), authorName: TEACHER,
+        announcementId: (input.announcementId as string) ?? null, evaluationId: (input.evaluationId as string) ?? null,
+        taskId: (input.taskId as string) ?? null, createdAt: Date.now(),
+      }
+      documents[String(input.hallId)].unshift(document)
+      return { ...document }
+    }
+    case 'deleteHallDocument':
+      documents[String(input.hallId)] = (documents[String(input.hallId)] ?? []).filter(item => item.id !== input.documentId)
+      return { ok: true }
+    case 'saveHallAnnouncement': {
+      const list = (announcements[String(input.hallId)] ??= [])
+      const existing = list.find(item => item.id === input.announcementId)
+      if (existing) {
+        Object.assign(existing, { body: String(input.body), updatedAt: Date.now() })
+        return { announcementId: existing.id }
+      }
+      const id = newId('aviso')
+      list.unshift({ id, body: String(input.body), authorName: TEACHER, createdAt: Date.now(), updatedAt: null })
+      return { announcementId: id }
+    }
+    case 'deleteHallAnnouncement':
+      announcements[String(input.hallId)] = (announcements[String(input.hallId)] ?? []).filter(item => item.id !== input.announcementId)
+      documents[String(input.hallId)] = (documents[String(input.hallId)] ?? []).filter(item => item.announcementId !== input.announcementId)
+      return { ok: true }
+    case 'saveHallEvaluation': {
+      const list = (evaluations[String(input.hallId)] ??= [])
+      const fields = {
+        title: String(input.title), date: Number(input.date), exigency: (input.exigency as number | null) ?? null,
+        skills: input.skills as string[], contents: input.contents as HallEvaluation['contents'],
+        objectives: input.objectives as HallEvaluation['objectives'], prep: String(input.prep ?? ''),
+      }
+      const existing = list.find(item => item.id === input.evaluationId)
+      if (existing) {
+        Object.assign(existing, fields, { updatedAt: Date.now() })
+        return { evaluationId: existing.id }
+      }
+      const id = newId('eval')
+      list.push({ id, ...fields, authorName: TEACHER, updatedAt: Date.now() })
+      return { evaluationId: id }
+    }
+    case 'deleteHallEvaluation':
+      evaluations[String(input.hallId)] = (evaluations[String(input.hallId)] ?? []).filter(item => item.id !== input.evaluationId)
+      documents[String(input.hallId)] = (documents[String(input.hallId)] ?? []).filter(item => item.evaluationId !== input.evaluationId)
+      return { ok: true }
+    case 'scanSpecTable': {
+      const draft: SpecTableDraft = {
+        title: 'Prueba de funciones',
+        date: new Date(now + 9 * day).toISOString().slice(0, 10),
+        exigency: 60,
+        objectives: [{ code: 'OA 3', text: 'Mostrar que comprenden la función afín.' }],
+        skills: ['Conocimiento', 'Aplicación', 'Comprensión'],
+        contents: [
+          { name: 'Función lineal', detail: 'Pendiente', points: [4, 6, 2] },
+          { name: 'Función afín', detail: 'Gráficos', points: [4, 8, 4] },
+          { name: 'Problemas', detail: '', points: [0, 6, 6] },
+        ],
+        prep: 'Estudiar guías 3 y 4.',
+        warnings: ['Revisa "Problemas": sus puntos suman 12 y la tabla dice 14.'],
+      }
+      return draft
     }
     default:
       return undefined

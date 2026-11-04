@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft, Building2 } from 'lucide-react'
+import { BrandingPanel } from '@/components/admin/branding-panel'
 import { CodePanel } from '@/components/admin/code-panel'
 import { InstitutionMark } from '@/components/admin/institution-mark'
 import { MembersPanel } from '@/components/admin/members-panel'
+import { ModulesPanel } from '@/components/admin/modules-panel'
 import { RosterPanel } from '@/components/admin/roster-panel'
 import { EmptyState } from '@/components/arc/empty-state/empty-state'
 import { Skeleton } from '@/components/arc/skeleton/skeleton'
@@ -56,10 +58,14 @@ function InstitutionPage() {
           <TabsTrigger value="personas">Personas y roles</TabsTrigger>
           <TabsTrigger value="nomina">Cargar nómina</TabsTrigger>
           <TabsTrigger value="codigo">Código de invitación</TabsTrigger>
+          <TabsTrigger value="modulos">Módulos</TabsTrigger>
+          <TabsTrigger value="marca">Escudo y banner</TabsTrigger>
         </TabsList>
         <TabsContent value="personas"><MembersPanel institution={institution} /></TabsContent>
         <TabsContent value="nomina"><RosterPanel institution={institution} /></TabsContent>
         <TabsContent value="codigo"><CodePanel institution={institution} /></TabsContent>
+        <TabsContent value="modulos"><ModulesPanel institution={institution} /></TabsContent>
+        <TabsContent value="marca"><BrandingPanel institution={institution} /></TabsContent>
       </Tabs>
     </div>
   )

@@ -2,15 +2,16 @@
 // Functions reales. Los nombres y RUT son inventados.
 import type { AdminInstitution, Member, MemberRole, RosterRow } from '@/lib/hnt-admin'
 import { classhallCall } from './classhall'
+import { eventsCall } from './events'
 
 const now = Date.now()
 const day = 86_400_000
 
 const institutions: AdminInstitution[] = [
-  { id: 'lch', name: 'LCH Temuco', fullName: 'Liceo Camilo Henríquez de Temuco', rosterCount: 1184, hasInviteCode: true, inviteUpdatedAt: now - 9 * day, logoUrl: null, bannerUrl: null },
+  { id: 'lch', name: 'LCH Temuco', fullName: 'Liceo Camilo Henríquez de Temuco', rosterCount: 1184, hasInviteCode: true, inviteUpdatedAt: now - 9 * day, logoUrl: null, bannerUrl: null, modules: ['feed', 'polls', 'alliances', 'electividad'] },
   { id: 'insuco', name: 'Insuco Padre Las Casas', fullName: 'Instituto Comercial de Padre Las Casas', rosterCount: 742, hasInviteCode: true, inviteUpdatedAt: now - 30 * day, logoUrl: null, bannerUrl: null },
   { id: 'araucania', name: 'Colegio Araucanía Verde', fullName: 'Colegio Araucanía Verde', rosterCount: 315, hasInviteCode: false, inviteUpdatedAt: null, logoUrl: null, bannerUrl: null },
-  { id: 'pehuen', name: 'Colegio Valle Pehuén', fullName: 'Colegio Valle Pehuén', rosterCount: 0, hasInviteCode: false, inviteUpdatedAt: null, logoUrl: null, bannerUrl: null },
+  { id: 'pehuen', name: 'Colegio Valle Pehuén', fullName: 'Colegio Valle Pehuén', rosterCount: 0, hasInviteCode: false, inviteUpdatedAt: null, logoUrl: null, bannerUrl: null, modules: ['feed'] },
 ]
 
 const members: Record<string, Member[]> = {
@@ -66,6 +67,16 @@ export async function demoCall(name: string, data: unknown): Promise<unknown> {
       rows.filter(row => row.rut && row.nombres).forEach(row => list.push({ rut: row.rut, fullName: `${row.nombres} ${row.apellidos}`.trim(), curso: row.curso, email: row.email, uid: null, role: null }))
       return { imported, rejected, rejectedCount: rejected.length }
     }
+    case 'setInstitutionModules': {
+      const item = institutions.find(entry => entry.id === input.institutionId)
+      if (item) item.modules = input.modules as AdminInstitution['modules']
+      return { modules: input.modules }
+    }
+    case 'adminSetInstitutionBranding': {
+      const item = institutions.find(entry => entry.id === input.institutionId)
+      if (item) item[input.kind === 'logo' ? 'logoUrl' : 'bannerUrl'] = (input.url as string | null) ?? null
+      return { kind: input.kind, url: input.url }
+    }
     case 'adminListMembers':
       return { members: (members[String(input.institutionId)] ?? []).map(item => ({ ...item })), truncated: false }
     case 'adminSetRole':
@@ -80,7 +91,7 @@ export async function demoCall(name: string, data: unknown): Promise<unknown> {
       return {}
     }
     default: {
-      const result = classhallCall(name, input)
+      const result = classhallCall(name, input) ?? eventsCall(name, input)
       if (result !== undefined) return result
       throw Object.assign(new Error('La demo todavía no tiene esta función.'), { code: 'functions/unimplemented' })
     }

@@ -82,7 +82,11 @@ export type HallTask = {
   updatedAt: number | null
 }
 
-export type HallTaskSummary = HallTask & { submittedCount?: number }
+export type HallTaskSummary = HallTask & {
+  submittedCount?: number
+  /** Entregas que el docente todavía no revisa. */
+  pendingReviewCount?: number
+}
 
 export type SubmissionItem =
   | { id: string; kind: 'link'; name: string; url: string }
@@ -118,7 +122,37 @@ export type HallTaskDetail = {
   isTeacher: boolean
   submissions?: HallSubmission[]
   expectedSubmissions?: number
+  /** Quienes no han entregado. Solo lo recibe el docente del Hall. */
+  missing?: { uid: string; name: string; courseId: string }[]
 }
+
+export type HallEvaluationInput = {
+  hallId: string
+  evaluationId?: string
+  title: string
+  date: number
+  exigency: number | null
+  skills: string[]
+  contents: { name: string; detail: string; points: number[] }[]
+  objectives: { code: string; text: string }[]
+  prep: string
+}
+
+/** Borrador que devuelve scanSpecTable a partir de una T.E. en PDF, Word o foto. */
+export type SpecTableDraft = {
+  title: string
+  /** "2026-11-12" o null si no la encontró. */
+  date: string | null
+  exigency: number | null
+  objectives: { code: string; text: string }[]
+  skills: string[]
+  contents: { name: string; detail: string; points: number[] }[]
+  prep: string
+  warnings: string[]
+}
+
+/** Lo que se adjunta a un archivo al moverlo al Hall. Sin nada, es material suelto. */
+export type DocumentAttach = { announcementId?: string; evaluationId?: string; taskId?: string }
 
 export type HallTaskInput = {
   hallId: string
@@ -139,6 +173,32 @@ export const getHallTask = (hallId: string, taskId: string) =>
 export async function saveHallTask(input: HallTaskInput) {
   return (await call<HallTaskInput, { taskId: string }>('saveHallTask')(input)).taskId
 }
+
+export const deleteHallTask = (hallId: string, taskId: string) => call('deleteHallTask')({ hallId, taskId })
+
+/** Mueve un archivo ya subido a la carpeta del docente (uploads.ts) al Hall. */
+export const attachHallDocument = (hallId: string, uploadPath: string, name: string, attach: DocumentAttach = {}) =>
+  call<object, HallDocument>('attachHallDocument')({ hallId, uploadPath, name, ...attach })
+
+export const deleteHallDocument = (hallId: string, documentId: string) => call('deleteHallDocument')({ hallId, documentId })
+
+export async function saveHallAnnouncement(hallId: string, body: string, announcementId?: string) {
+  return (await call<object, { announcementId: string }>('saveHallAnnouncement')({ hallId, body, announcementId })).announcementId
+}
+
+export const deleteHallAnnouncement = (hallId: string, announcementId: string) =>
+  call('deleteHallAnnouncement')({ hallId, announcementId })
+
+export async function saveHallEvaluation(input: HallEvaluationInput) {
+  return (await call<HallEvaluationInput, { evaluationId: string }>('saveHallEvaluation')(input)).evaluationId
+}
+
+export const deleteHallEvaluation = (hallId: string, evaluationId: string) =>
+  call('deleteHallEvaluation')({ hallId, evaluationId })
+
+/** Lee una T.E. ya subida (PDF, Word o foto). El archivo sigue en la carpeta del docente. */
+export const scanSpecTable = (hallId: string, uploadPath: string) =>
+  call<object, SpecTableDraft>('scanSpecTable')({ hallId, uploadPath })
 
 export const reviewHallSubmission = (hallId: string, taskId: string, studentUid: string, reviewed: boolean, feedback: string) =>
   call<object, HallSubmission>('reviewHallSubmission')({ hallId, taskId, studentUid, reviewed, feedback })
