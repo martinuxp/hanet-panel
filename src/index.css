@@ -162,15 +162,24 @@
   }
 }
 
-/* El brillo de la app (components/events/event-glow.tsx): los dos tonos de
-   glow de HaNet bajan desde arriba y se apagan antes de la mitad. Da
-   temperatura sin teñir las superficies donde se lee. */
+/* Fondo sólido: el rosa queda como el único color fuerte (botón principal,
+   progreso, seleccionado). Sin manchas de brillo detrás del contenido. */
 .hn-atmosphere {
   background-color: var(--background);
-  background-image:
-    radial-gradient(70% 420px at 18% -80px, color-mix(in oklab, var(--hn-glow-top) 55%, transparent), transparent 70%),
-    radial-gradient(55% 360px at 82% -120px, color-mix(in oklab, var(--hn-glow-center) 30%, transparent), transparent 70%);
-  background-repeat: no-repeat;
+}
+
+/* Fuera de @layer a propósito: una regla sin capa le gana a cualquier capa.
+   Si el HTML que envuelve al panel trae su propio body { color: #000;
+   background: #fff; font: ... } (el visor de la demo lo hace), con esto el
+   texto sigue siendo el de HaNet y no negro puro. */
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 16px;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 @layer base {

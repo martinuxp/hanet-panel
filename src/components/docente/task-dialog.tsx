@@ -58,7 +58,7 @@ export function TaskDialog({ hallId, open, onOpenChange, onSaved }: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent title="Nueva tarea" description="Los estudiantes del Hall la ven al tiro, y sale en el Calendar del curso.">
+      <DialogContent title="Nueva tarea" description="Los estudiantes del Hall la ven de inmediato. También aparece en el Calendar del curso.">
         <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
           <Input id="task-title" label="Título" value={title} onChange={event => setTitle(event.target.value)} maxLength={120} required />
           <Textarea id="task-instructions" label="Instrucciones" description="Opcional." value={instructions} onChange={event => setInstructions(event.target.value)} rows={4} />

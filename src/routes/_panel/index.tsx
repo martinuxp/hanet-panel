@@ -73,7 +73,7 @@ function HntHome() {
       <section className="flex flex-col gap-4 rounded-(--radius-surface) bg-(--surface) p-6 shadow-(--shadow-raised)">
         <div className="flex items-baseline justify-between gap-2">
           <h2 className="text-(length:--text-lg) font-medium">Por hacer</h2>
-          {todo.length > 0 && <Badge tone="warning" size="sm">{todo.length}</Badge>}
+          {todo.length > 0 && <Badge tone="info" size="sm">{todo.length}</Badge>}
         </div>
         {todo.length === 0 ? (
           <p className="flex items-center gap-2 text-(--text-secondary)">
@@ -124,7 +124,7 @@ function RosterBars({ institutions }: { institutions: AdminInstitution[] }) {
             <span className="flex min-w-0 flex-col gap-1.5">
               <span className="flex items-center gap-2">
                 <span className="truncate font-medium">{item.name}</span>
-                {!item.hasInviteCode && <Badge tone="warning" size="sm">Sin código</Badge>}
+                {!item.hasInviteCode && <Badge size="sm">Sin código</Badge>}
               </span>
               <span className="h-1.5 overflow-hidden rounded-full bg-(--surface-muted)">
                 <span

@@ -38,7 +38,7 @@ function HallsPage() {
         <EmptyState
           icon={<GraduationCap />}
           title="Todavía no tienes Halls"
-          description="Crea tu primer Hall desde ClassHall en la app. Aparece aquí al tiro."
+          description="Crea tu primer Hall desde ClassHall en la app y aparecerá aquí."
         />
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
