@@ -1,5 +1,4 @@
-import { httpsCallable } from 'firebase/functions'
-import { functions } from '@/lib/firebase'
+import { call } from '@/lib/callable'
 
 // Port de hanetcl/services/hnt-admin-service.ts. Todo pasa por las funciones
 // admin* del backend, que exigen el claim HNT en cada llamada.
@@ -44,13 +43,6 @@ export type Member = {
   blocked?: boolean
 }
 
-function call<Req, Res>(name: string) {
-  return async (data: Req): Promise<Res> => {
-    // Comparación literal para que el build normal elimine la demo entera.
-    if (import.meta.env.VITE_DEMO === '1') return (await import('@/demo/backend')).demoCall(name, data) as Promise<Res>
-    return (await httpsCallable<Req, Res>(functions, name)(data)).data
-  }
-}
 
 export async function listInstitutions() {
   return (await call<void, { institutions: AdminInstitution[] }>('adminListInstitutions')(undefined)).institutions

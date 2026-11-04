@@ -1,6 +1,7 @@
 // Backend falso del modo demo. Responde con la misma forma que las Cloud
 // Functions reales. Los nombres y RUT son inventados.
 import type { AdminInstitution, Member, MemberRole, RosterRow } from '@/lib/hnt-admin'
+import { classhallCall } from './classhall'
 
 const now = Date.now()
 const day = 86_400_000
@@ -78,7 +79,10 @@ export async function demoCall(name: string, data: unknown): Promise<unknown> {
       Object.assign(member, { uid: null, role: null, blocked: false })
       return {}
     }
-    default:
+    default: {
+      const result = classhallCall(name, input)
+      if (result !== undefined) return result
       throw Object.assign(new Error('La demo todavía no tiene esta función.'), { code: 'functions/unimplemented' })
+    }
   }
 }
