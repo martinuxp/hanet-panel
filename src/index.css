@@ -5,11 +5,12 @@
 @import "@fontsource-variable/inter";
 @import "./components/arc/foundation.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Solo oscuro: las variantes dark: aplican siempre, haya o no clase .dark. */
+@custom-variant dark (&);
 
 /* Componentes, tipografía, radios y motion: Arc (uiarc.dev).
    Colores: solo los de HaNet (sistema de diseño "HaNet", tokens.json).
-   El panel es solo modo oscuro: <html data-theme="dark" class="dark">. */
+   El panel es solo modo oscuro, con o sin data-theme en <html>. */
 
 :root {
     --hn-canvas: #282829;
@@ -34,10 +35,12 @@
     --font-inter: "Inter Variable";
 }
 
-/* Roles de Arc con valores HaNet. Mismo selector que foundation.css y
-   declarado después, así gana. */
-:root[data-theme="dark"],
-:root[data-theme="dark"][data-accent] {
+/* Roles de Arc con valores HaNet. Mismo peso que los selectores de
+   foundation.css y declarado después, así gana. No depende de data-theme:
+   el panel es solo oscuro aunque alguien cambie ese atributo. */
+:root,
+:root[data-theme],
+:root[data-theme][data-accent] {
     color-scheme: dark;
     --background: var(--hn-canvas);
     --surface: var(--hn-surface);
@@ -93,7 +96,9 @@
     --input: var(--border-strong);
     --ring: var(--hn-control-active);
     --radius: var(--radius-control);
-    --sidebar: var(--hn-primary-strong);
+    /* Mismo gris que el fondo: el azul de primaryStrong chocaba con el gris
+       cálido del resto. Lo separa el borde. */
+    --sidebar: var(--background);
     --sidebar-foreground: var(--foreground);
     --sidebar-primary: var(--accent);
     --sidebar-primary-foreground: var(--accent-foreground);
@@ -157,15 +162,24 @@
   }
 }
 
-/* El brillo de la app (components/events/event-glow.tsx): los dos tonos de
-   glow de HaNet bajan desde arriba y se apagan antes de la mitad. Da
-   temperatura sin teñir las superficies donde se lee. */
+/* Fondo sólido: el rosa queda como el único color fuerte (botón principal,
+   progreso, seleccionado). Sin manchas de brillo detrás del contenido. */
 .hn-atmosphere {
   background-color: var(--background);
-  background-image:
-    radial-gradient(70% 420px at 18% -80px, color-mix(in oklab, var(--hn-glow-top) 55%, transparent), transparent 70%),
-    radial-gradient(55% 360px at 82% -120px, color-mix(in oklab, var(--hn-glow-center) 30%, transparent), transparent 70%);
-  background-repeat: no-repeat;
+}
+
+/* Fuera de @layer a propósito: una regla sin capa le gana a cualquier capa.
+   Si el HTML que envuelve al panel trae su propio body { color: #000;
+   background: #fff; font: ... } (el visor de la demo lo hace), con esto el
+   texto sigue siendo el de HaNet y no negro puro. */
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 16px;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 @layer base {

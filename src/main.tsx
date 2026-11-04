@@ -1,8 +1,9 @@
-import { createRouter, RouterProvider } from '@tanstack/react-router'
+import { createHashHistory, createRouter, RouterProvider } from '@tanstack/react-router'
 import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider, useAuth } from '@/lib/auth'
+import { DEMO } from '@/lib/demo'
 import { routeTree } from './routeTree.gen'
 import './index.css'
 
@@ -11,7 +12,8 @@ import './index.css'
 document.documentElement.dataset.theme = 'dark'
 document.documentElement.classList.add('dark')
 
-const router = createRouter({ routeTree, context: { auth: undefined! } })
+// La demo vive dentro de una página ajena, así que navega con el hash.
+const router = createRouter({ routeTree, context: { auth: undefined! }, history: DEMO ? createHashHistory() : undefined })
 
 declare module '@tanstack/react-router' {
   interface Register {

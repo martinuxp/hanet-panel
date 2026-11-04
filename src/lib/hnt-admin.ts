@@ -1,5 +1,6 @@
-import { httpsCallable } from 'firebase/functions'
-import { functions } from '@/lib/firebase'
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { call } from '@/lib/callable'
+import { storage } from '@/lib/firebase'
 
 // Port de hanetcl/services/hnt-admin-service.ts. Todo pasa por las funciones
 // admin* del backend, que exigen el claim HNT en cada llamada.
@@ -13,7 +14,19 @@ export type AdminInstitution = {
   inviteUpdatedAt: number | null
   logoUrl: string | null
   bannerUrl: string | null
+  /** Módulos prendidos. Null: la institución todavía no tiene lista, así que todos están prendidos. */
+  modules?: ModuleId[] | null
 }
+
+/** Módulos que se pueden apagar por institución (setInstitutionModules en hanetcl). */
+export const MODULES = [
+  { id: 'feed', name: 'Feed y Comunidad', description: 'Publicaciones del liceo, el CEE y las directivas, con reacciones.' },
+  { id: 'polls', name: 'Encuestas', description: 'Encuestas anónimas dentro del Feed. Necesita el Feed prendido.' },
+  { id: 'alliances', name: 'Aniversario', description: 'Alianzas, actividades, puntajes y la semana del aniversario en el inicio.' },
+  { id: 'electividad', name: 'Electividad', description: 'Test de intereses para elegir electivos, en Herramientas.' },
+] as const
+
+export type ModuleId = (typeof MODULES)[number]['id']
 
 export type RosterRow = {
   rut: string
@@ -44,9 +57,6 @@ export type Member = {
   blocked?: boolean
 }
 
-function call<Req, Res>(name: string) {
-  return async (data: Req) => (await httpsCallable<Req, Res>(functions, name)(data)).data
-}
 
 export async function listInstitutions() {
   return (await call<void, { institutions: AdminInstitution[] }>('adminListInstitutions')(undefined)).institutions
@@ -59,6 +69,62 @@ export async function createInstitution(name: string, fullName: string) {
 /** Devuelve la frase nueva. El backend guarda solo su hash: es la única vez que se puede leer. */
 export async function rotateInviteCode(institutionId: string) {
   return (await call<{ institutionId: string }, { words: string[] }>('adminRotateInviteCode')({ institutionId })).words
+}
+
+export async function setInstitutionModules(institutionId: string, modules: ModuleId[]) {
+  return (await call<{ institutionId: string; modules: ModuleId[] }, { modules: ModuleId[] }>('setInstitutionModules')({ institutionId, modules })).modules
+}
+
+export type BrandingKind = 'logo' | 'banner'
+
+// El escudo conserva su transparencia (PNG); el banner es una foto (JPEG). Igual que la app.
+const BRANDING_FILES: Record<BrandingKind, { file: string; width: number; type: string; quality?: number }> = {
+  logo: { file: 'logo.png', width: 512, type: 'image/png' },
+  banner: { file: 'banner.jpg', width: 1600, type: 'image/jpeg', quality: 0.82 },
+}
+
+/** Achica la imagen en el navegador antes de subirla. */
+async function resizeImage(file: File, width: number, type: string, quality?: number): Promise<Blob> {
+  const bitmap = await createImageBitmap(file)
+  const scale = Math.min(1, width / bitmap.width)
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(bitmap.width * scale)
+  canvas.height = Math.round(bitmap.height * scale)
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('Este navegador no puede preparar la imagen.')
+  if (type === 'image/jpeg') {
+    context.fillStyle = '#ffffff'
+    context.fillRect(0, 0, canvas.width, canvas.height)
+  }
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  bitmap.close()
+  return new Promise((resolve, reject) => canvas.toBlob(blob => (blob ? resolve(blob) : reject(new Error('No pudimos preparar la imagen.'))), type, quality))
+}
+
+/** Achica, sube y guarda la imagen; devuelve su URL pública. */
+export async function uploadBrandingImage(institutionId: string, kind: BrandingKind, file: File) {
+  const spec = BRANDING_FILES[kind]
+  if (import.meta.env.VITE_DEMO === '1') {
+    const url = URL.createObjectURL(file)
+    await call('adminSetInstitutionBranding')({ institutionId, kind, url })
+    return url
+  }
+  const blob = await resizeImage(file, spec.width, spec.type, spec.quality)
+  const fileRef = ref(storage, `institutions/${institutionId}/${spec.file}`)
+  await uploadBytes(fileRef, blob, { contentType: spec.type, cacheControl: 'public, max-age=86400' })
+  const url = await getDownloadURL(fileRef)
+  await call('adminSetInstitutionBranding')({ institutionId, kind, url })
+  return url
+}
+
+export async function removeBrandingImage(institutionId: string, kind: BrandingKind) {
+  await call('adminSetInstitutionBranding')({ institutionId, kind, url: null })
+  if (import.meta.env.VITE_DEMO === '1') return
+  try {
+    await deleteObject(ref(storage, `institutions/${institutionId}/${BRANDING_FILES[kind].file}`))
+  } catch (error) {
+    if ((error as { code?: string }).code !== 'storage/object-not-found') throw error
+  }
 }
 
 export function importRoster(institutionId: string, rows: RosterRow[]) {

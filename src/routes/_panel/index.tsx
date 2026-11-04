@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, Building2, CalendarCheck, Check, KeyRound, Users } from 'lucide-react'
+import { ArrowRight, Building2, CalendarCheck, Check, GraduationCap, KeyRound, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Badge } from '@/components/arc/badge/badge'
 import { Skeleton } from '@/components/arc/skeleton/skeleton'
 import { InstitutionMark } from '@/components/admin/institution-mark'
 import { useAuth, type PanelRole } from '@/lib/auth'
 import { plural, type AdminInstitution } from '@/lib/hnt-admin'
+import { TEACHER_ROLES } from '@/lib/nav'
 import { useInstitutions } from '@/lib/use-institutions'
 
 export const Route = createFileRoute('/_panel/')({
@@ -72,7 +73,7 @@ function HntHome() {
       <section className="flex flex-col gap-4 rounded-(--radius-surface) bg-(--surface) p-6 shadow-(--shadow-raised)">
         <div className="flex items-baseline justify-between gap-2">
           <h2 className="text-(length:--text-lg) font-medium">Por hacer</h2>
-          {todo.length > 0 && <Badge tone="warning" size="sm">{todo.length}</Badge>}
+          {todo.length > 0 && <Badge tone="info" size="sm">{todo.length}</Badge>}
         </div>
         {todo.length === 0 ? (
           <p className="flex items-center gap-2 text-(--text-secondary)">
@@ -123,7 +124,7 @@ function RosterBars({ institutions }: { institutions: AdminInstitution[] }) {
             <span className="flex min-w-0 flex-col gap-1.5">
               <span className="flex items-center gap-2">
                 <span className="truncate font-medium">{item.name}</span>
-                {!item.hasInviteCode && <Badge tone="warning" size="sm">Sin código</Badge>}
+                {!item.hasInviteCode && <Badge size="sm">Sin código</Badge>}
               </span>
               <span className="h-1.5 overflow-hidden rounded-full bg-(--surface-muted)">
                 <span
@@ -142,13 +143,21 @@ function RosterBars({ institutions }: { institutions: AdminInstitution[] }) {
 
 function StaffHome({ role, courseId }: { role: PanelRole | null; courseId: string | null }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr))]">
       {role === 'HNT' && (
         <AreaLink
           to="/instituciones"
           icon={<Building2 aria-hidden="true" className="size-5" />}
           title="Instituciones y miembros"
           description="Códigos de invitación, nóminas y roles."
+        />
+      )}
+      {role && TEACHER_ROLES.includes(role) && (
+        <AreaLink
+          to="/halls"
+          icon={<GraduationCap aria-hidden="true" className="size-5" />}
+          title="Mis Halls"
+          description="Publica tareas y revisa las entregas una tras otra."
         />
       )}
       <AreaLink
@@ -164,7 +173,7 @@ function StaffHome({ role, courseId }: { role: PanelRole | null; courseId: strin
 }
 
 // Acceso a un área del panel: toda la tarjeta es el link.
-function AreaLink({ to, icon, title, description }: { to: '/instituciones' | '/calendario'; icon: ReactNode; title: string; description: string }) {
+function AreaLink({ to, icon, title, description }: { to: '/instituciones' | '/halls' | '/calendario'; icon: ReactNode; title: string; description: string }) {
   return (
     <Link
       to={to}

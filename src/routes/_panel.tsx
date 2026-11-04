@@ -64,7 +64,7 @@ function PanelLayout() {
                   <SidebarMenuItem key={item.to}>
                     <SidebarMenuButton
                       className="h-10 rounded-(--radius-control) px-3 text-(length:--text-sm) text-(--text-secondary) data-[status=active]:bg-sidebar-accent data-[status=active]:text-(--foreground) data-[status=active]:[&_svg]:text-(--accent)"
-                      render={<Link to={item.to} activeOptions={{ exact: true }} />}
+                      render={<Link to={item.to} activeOptions={{ exact: item.to === '/' }} />}
                     >
                       <item.icon />
                       <span>{item.label}</span>
@@ -87,7 +87,7 @@ function PanelLayout() {
           </Button>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset className="hn-atmosphere">
+      <SidebarInset className="hn-atmosphere min-w-0">
         <header className="flex h-14 items-center px-4 md:hidden">
           <SidebarTrigger aria-label="Abrir menú" />
         </header>

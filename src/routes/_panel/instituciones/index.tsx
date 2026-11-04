@@ -74,8 +74,8 @@ function InstitutionsPage() {
                     {!!institution.fullName && <span className="truncate text-(length:--text-sm) text-(--text-secondary)">{institution.fullName}</span>}
                   </span>
                   <span className="hidden items-center gap-2 sm:flex">
-                    {institution.rosterCount === 0 && <Badge tone="warning" size="sm">Nómina vacía</Badge>}
-                    {!institution.hasInviteCode && <Badge tone="warning" size="sm">Sin código</Badge>}
+                    {institution.rosterCount === 0 && <Badge size="sm">Nómina vacía</Badge>}
+                    {!institution.hasInviteCode && <Badge size="sm">Sin código</Badge>}
                     {institution.rosterCount > 0 && <span className="w-28 text-right whitespace-nowrap text-(length:--text-sm) tabular-nums text-(--text-secondary)">{plural(institution.rosterCount, 'persona', 'personas')}</span>}
                   </span>
                   <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-(--text-muted) transition-transform duration-(--duration-fast) group-hover:translate-x-0.5 motion-reduce:transition-none" />
