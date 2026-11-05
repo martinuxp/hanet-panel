@@ -3,6 +3,7 @@ import type {
   Hall, HallAnnouncement, HallDetail, HallDocument, HallDocumentKind, HallEvaluation, HallSubmission, HallTaskDetail,
   HallTaskSummary, SpecTableDraft, SubmissionItem,
 } from '@/lib/classhall'
+import type { EvaluationGrades, GradeStatus } from '@/lib/grades'
 import { fileType } from '@/lib/uploads'
 
 // Plazos a las 23:59, como los pone un docente.
@@ -98,6 +99,11 @@ const evaluations: Record<string, HallEvaluation[]> = Object.fromEntries(halls.m
       objectives: [{ code: 'OA 3', text: 'Mostrar que comprenden la función afín.' }, { code: 'OA 4', text: '' }],
       prep: 'Guías 3 y 4.', authorName: TEACHER, updatedAt: null,
     }]
+    .concat(hall.id === 'mat-2k' ? [{
+      id: 'e-control-pendiente', title: 'Control de pendiente', date: now - 9 * day, exigency: 60,
+      skills: ['Conocimiento', 'Aplicación'], contents: [{ name: 'Pendiente', detail: '', points: [10, 14] }],
+      objectives: [{ code: 'OA 3', text: '' }], prep: '', authorName: TEACHER, updatedAt: null,
+    }] : [])
   : []]))
 
 const documents: Record<string, HallDocument[]> = {
@@ -140,6 +146,34 @@ function notFound(message: string): never {
 
 type Data = Record<string, unknown>
 
+// Notas falsas: el control pasado ya está publicado y algunos lo rasparon.
+type GradeSheet = { weight: number | null; publishedAt: number | null; grades: Record<string, { grade: number; status: GradeStatus; seen: boolean }> }
+const gradeSheets: Record<string, GradeSheet> = {
+  'mat-2k/e-control-pendiente': {
+    weight: 20,
+    publishedAt: now - 6 * day,
+    grades: Object.fromEntries(STUDENTS.slice(0, 22).map((_, index) => {
+      const grade = [6.2, 5.4, 4.0, 6.8, 3.1, 5.9, 7.0, 4.6, 5.1, 6.5, 3.8, 5.7][index % 12]
+      return [`alumno-${index}`, { grade, status: 'published' as const, seen: index % 3 !== 0 }]
+    })),
+  },
+}
+
+function gradeSheet(hallId: string, evaluationId: string) {
+  return (gradeSheets[`${hallId}/${evaluationId}`] ??= { weight: null, publishedAt: null, grades: {} })
+}
+
+function gradesSummary(hallId: string, evaluationId: string) {
+  const sheet = gradeSheets[`${hallId}/${evaluationId}`]
+  return { gradesCount: sheet ? Object.keys(sheet.grades).length : 0, gradesPublishedAt: sheet?.publishedAt ?? null }
+}
+
+function hallRoster(hall: Hall) {
+  return STUDENTS.slice(0, Math.min(hall.memberCount ?? 0, STUDENTS.length))
+    .map((name, index) => ({ uid: `alumno-${index}`, name, courseId: hall.plan === 'comun' ? hall.courseId : ['Tercero Medio A', 'Tercero Medio B', 'Cuarto Medio A'][index % 3] }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+}
+
 export function classhallCall(name: string, input: Data): unknown {
   switch (name) {
     case 'listMyHalls':
@@ -151,7 +185,7 @@ export function classhallCall(name: string, input: Data): unknown {
         expectedSubmissions: hall.memberCount,
         tasks: tasks.filter(task => task.hallId === hall.id).map(summary),
         announcements: [...(announcements[hall.id] ?? [])],
-        evaluations: [...(evaluations[hall.id] ?? [])].sort((a, b) => a.date - b.date),
+        evaluations: [...(evaluations[hall.id] ?? [])].sort((a, b) => a.date - b.date).map(evaluation => ({ ...evaluation, ...gradesSummary(hall.id, evaluation.id) })),
         documents: [...(documents[hall.id] ?? [])],
       }
       return detail
@@ -253,6 +287,51 @@ export function classhallCall(name: string, input: Data): unknown {
       evaluations[String(input.hallId)] = (evaluations[String(input.hallId)] ?? []).filter(item => item.id !== input.evaluationId)
       documents[String(input.hallId)] = (documents[String(input.hallId)] ?? []).filter(item => item.evaluationId !== input.evaluationId)
       return { ok: true }
+    case 'getEvaluationGrades': {
+      const hall = halls.find(item => item.id === input.hallId) ?? notFound('No encontramos ese Hall.')
+      const evaluation = (evaluations[hall.id] ?? []).find(item => item.id === input.evaluationId) ?? notFound('No encontramos esa evaluación.')
+      const sheet = gradeSheet(hall.id, evaluation.id)
+      const result: EvaluationGrades = {
+        evaluation: { id: evaluation.id, title: evaluation.title, date: evaluation.date, weight: sheet.weight, published: sheet.publishedAt != null, publishedAt: sheet.publishedAt },
+        students: hallRoster(hall).map(student => {
+          const entry = sheet.grades[student.uid]
+          return { ...student, grade: entry?.grade ?? null, status: entry?.status ?? null, seen: entry?.seen ?? false }
+        }),
+        withoutAccount: hall.plan === 'comun' ? Math.max(0, (hall.memberCount ?? 0) - STUDENTS.length) : 0,
+      }
+      return result
+    }
+    case 'saveEvaluationGrades': {
+      const hall = halls.find(item => item.id === input.hallId) ?? notFound('No encontramos ese Hall.')
+      const sheet = gradeSheet(hall.id, String(input.evaluationId))
+      const roster = new Set(hallRoster(hall).map(student => student.uid))
+      let saved = 0
+      let removed = 0
+      for (const { uid, grade } of input.grades as { uid: string; grade: number | null }[]) {
+        if (!roster.has(uid)) throw Object.assign(new Error('Una de las notas es de alguien que no está en el Hall.'), { code: 'functions/invalid-argument' })
+        if (grade == null) {
+          if (sheet.grades[uid]) removed++
+          delete sheet.grades[uid]
+          continue
+        }
+        if (grade < 1 || grade > 7 || Math.round(grade * 10) !== grade * 10) throw Object.assign(new Error('Las notas van de 1,0 a 7,0, con un decimal.'), { code: 'functions/invalid-argument' })
+        const previous = sheet.grades[uid]
+        if (previous?.grade === grade) continue
+        sheet.grades[uid] = { grade, status: sheet.publishedAt != null ? 'published' : 'draft', seen: false }
+        saved++
+      }
+      if (input.weight !== undefined) sheet.weight = (input.weight as number | null) ?? null
+      return { saved, removed }
+    }
+    case 'publishEvaluationGrades': {
+      const sheet = gradeSheet(String(input.hallId), String(input.evaluationId))
+      let published = 0
+      for (const entry of Object.values(sheet.grades)) {
+        if (entry.status === 'draft') { entry.status = 'published'; published++ }
+      }
+      sheet.publishedAt ??= Date.now()
+      return { published }
+    }
     case 'scanSpecTable': {
       const draft: SpecTableDraft = {
         title: 'Prueba de funciones',

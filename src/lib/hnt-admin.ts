@@ -24,6 +24,7 @@ export const MODULES = [
   { id: 'polls', name: 'Encuestas', description: 'Encuestas anónimas dentro del Feed. Necesita el Feed prendido.' },
   { id: 'alliances', name: 'Aniversario', description: 'Alianzas, actividades, puntajes y la semana del aniversario en el inicio.' },
   { id: 'electividad', name: 'Electividad', description: 'Test de intereses para elegir electivos, en Herramientas.' },
+  { id: 'grades', name: 'Notas', description: 'Los docentes publican las notas de sus evaluaciones y cada estudiante raspa la suya en la app.' },
 ] as const
 
 export type ModuleId = (typeof MODULES)[number]['id']

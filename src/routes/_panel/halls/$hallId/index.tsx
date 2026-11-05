@@ -197,6 +197,9 @@ function EvaluationsPanel({ detail }: { detail: HallDetail }) {
                     {total > 0 && <Badge size="sm">{total} puntos</Badge>}
                     {evaluation.exigency != null && <Badge size="sm">Exigencia {evaluation.exigency}%</Badge>}
                     {!hasSpec && <Badge size="sm" tone="warning">Sin T.E.</Badge>}
+                    {evaluation.gradesPublishedAt != null
+                      ? <Badge size="sm" tone="success">Notas publicadas</Badge>
+                      : evaluation.gradesCount ? <Badge size="sm">Notas en borrador</Badge> : null}
                     <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-(--text-muted) transition-transform duration-(--duration-fast) group-hover:translate-x-0.5 group-hover:text-(--accent) motion-reduce:transition-none" />
                   </span>
                 </Link>

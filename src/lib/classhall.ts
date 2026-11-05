@@ -53,6 +53,9 @@ export type HallEvaluation = {
   prep: string
   authorName: string
   updatedAt: number | null
+  /** Solo para el docente y Admin, cuando la institución tiene el módulo Notas. */
+  gradesCount?: number
+  gradesPublishedAt?: number | null
 }
 
 export type HallDocumentKind = 'pdf' | 'word' | 'powerpoint' | 'excel' | 'image' | 'file'

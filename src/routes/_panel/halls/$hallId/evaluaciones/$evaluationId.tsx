@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { FileText, Plus, ScanText, Trash2, X } from 'lucide-react'
+import { ClipboardList, FileText, Plus, ScanText, Trash2, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Alert } from '@/components/arc/alert/alert'
 import { Button } from '@/components/arc/button/button'
@@ -70,6 +70,7 @@ const cellClass = 'w-full min-w-0 rounded-(--radius-control) border border-(--bo
 function EvaluationPage() {
   const { hallId, evaluationId } = Route.useParams()
   const { data, error, retry } = useLoad(() => getHall(hallId), [hallId], 'No pudimos abrir este Hall. Inténtalo nuevamente.')
+  const navigate = useNavigate()
   const back = <BackLink to="/halls/$hallId" params={{ hallId }} search={{ tab: 'evaluaciones' }}>Volver al Hall</BackLink>
   const isNew = evaluationId === 'nueva'
 
@@ -92,11 +93,18 @@ function EvaluationPage() {
   return (
     <div className="flex flex-col gap-6">
       {back}
-      <header className="flex flex-col gap-1">
-        <p className="text-(--text-secondary)">{data.hall.subject} · {data.hall.courseId}</p>
-        <h1 className="font-heading text-(length:--text-3xl) leading-(--leading-display) font-medium tracking-(--tracking-display) text-balance">
-          {evaluation ? evaluation.title : 'Nueva evaluación'}
-        </h1>
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <p className="text-(--text-secondary)">{data.hall.subject} · {data.hall.courseId}</p>
+          <h1 className="font-heading text-(length:--text-3xl) leading-(--leading-display) font-medium tracking-(--tracking-display) text-balance">
+            {evaluation ? evaluation.title : 'Nueva evaluación'}
+          </h1>
+        </div>
+        {evaluation && (
+          <Button variant="secondary" onClick={() => void navigate({ to: '/halls/$hallId/notas/$evaluationId', params: { hallId, evaluationId: evaluation.id } })}>
+            <ClipboardList aria-hidden="true" className="size-4" /> {evaluation.gradesPublishedAt != null ? 'Ver notas' : 'Poner notas'}
+          </Button>
+        )}
       </header>
       <EvaluationForm hallId={hallId} evaluation={evaluation} specTable={specTable} />
     </div>

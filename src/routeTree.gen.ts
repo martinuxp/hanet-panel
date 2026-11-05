@@ -24,6 +24,7 @@ import { Route as PanelInstitucionesIndexRouteImport } from './routes/_panel/ins
 import { Route as PanelInstitucionesInstitutionIdRouteImport } from './routes/_panel/instituciones/$institutionId'
 import { Route as PanelHallsHallIdIndexRouteImport } from './routes/_panel/halls/$hallId/index'
 import { Route as PanelHallsHallIdEvaluacionesEvaluationIdRouteImport } from './routes/_panel/halls/$hallId/evaluaciones/$evaluationId'
+import { Route as PanelHallsHallIdNotasEvaluationIdRouteImport } from './routes/_panel/halls/$hallId/notas/$evaluationId'
 import { Route as PanelHallsHallIdTareasTaskIdRouteImport } from './routes/_panel/halls/$hallId/tareas/$taskId'
 
 const PanelRoute = PanelRouteImport.update({
@@ -102,6 +103,12 @@ const PanelHallsHallIdEvaluacionesEvaluationIdRoute =
     path: '/$hallId/evaluaciones/$evaluationId',
     getParentRoute: () => PanelHallsRouteRoute,
   } as any)
+const PanelHallsHallIdNotasEvaluationIdRoute =
+  PanelHallsHallIdNotasEvaluationIdRouteImport.update({
+    id: '/$hallId/notas/$evaluationId',
+    path: '/$hallId/notas/$evaluationId',
+    getParentRoute: () => PanelHallsRouteRoute,
+  } as any)
 const PanelHallsHallIdTareasTaskIdRoute =
   PanelHallsHallIdTareasTaskIdRouteImport.update({
     id: '/$hallId/tareas/$taskId',
@@ -124,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/instituciones/': typeof PanelInstitucionesIndexRoute
   '/halls/$hallId/': typeof PanelHallsHallIdIndexRoute
   '/halls/$hallId/evaluaciones/$evaluationId': typeof PanelHallsHallIdEvaluacionesEvaluationIdRoute
+  '/halls/$hallId/notas/$evaluationId': typeof PanelHallsHallIdNotasEvaluationIdRoute
   '/halls/$hallId/tareas/$taskId': typeof PanelHallsHallIdTareasTaskIdRoute
 }
 export interface FileRoutesByTo {
@@ -138,6 +146,7 @@ export interface FileRoutesByTo {
   '/instituciones': typeof PanelInstitucionesIndexRoute
   '/halls/$hallId': typeof PanelHallsHallIdIndexRoute
   '/halls/$hallId/evaluaciones/$evaluationId': typeof PanelHallsHallIdEvaluacionesEvaluationIdRoute
+  '/halls/$hallId/notas/$evaluationId': typeof PanelHallsHallIdNotasEvaluationIdRoute
   '/halls/$hallId/tareas/$taskId': typeof PanelHallsHallIdTareasTaskIdRoute
 }
 export interface FileRoutesById {
@@ -157,6 +166,7 @@ export interface FileRoutesById {
   '/_panel/instituciones/': typeof PanelInstitucionesIndexRoute
   '/_panel/halls/$hallId/': typeof PanelHallsHallIdIndexRoute
   '/_panel/halls/$hallId/evaluaciones/$evaluationId': typeof PanelHallsHallIdEvaluacionesEvaluationIdRoute
+  '/_panel/halls/$hallId/notas/$evaluationId': typeof PanelHallsHallIdNotasEvaluationIdRoute
   '/_panel/halls/$hallId/tareas/$taskId': typeof PanelHallsHallIdTareasTaskIdRoute
 }
 export interface FileRouteTypes {
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/instituciones/'
     | '/halls/$hallId/'
     | '/halls/$hallId/evaluaciones/$evaluationId'
+    | '/halls/$hallId/notas/$evaluationId'
     | '/halls/$hallId/tareas/$taskId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/instituciones'
     | '/halls/$hallId'
     | '/halls/$hallId/evaluaciones/$evaluationId'
+    | '/halls/$hallId/notas/$evaluationId'
     | '/halls/$hallId/tareas/$taskId'
   id:
     | '__root__'
@@ -208,6 +220,7 @@ export interface FileRouteTypes {
     | '/_panel/instituciones/'
     | '/_panel/halls/$hallId/'
     | '/_panel/halls/$hallId/evaluaciones/$evaluationId'
+    | '/_panel/halls/$hallId/notas/$evaluationId'
     | '/_panel/halls/$hallId/tareas/$taskId'
   fileRoutesById: FileRoutesById
 }
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelHallsHallIdEvaluacionesEvaluationIdRouteImport
       parentRoute: typeof PanelHallsRouteRoute
     }
+    '/_panel/halls/$hallId/notas/$evaluationId': {
+      id: '/_panel/halls/$hallId/notas/$evaluationId'
+      path: '/$hallId/notas/$evaluationId'
+      fullPath: '/halls/$hallId/notas/$evaluationId'
+      preLoaderRoute: typeof PanelHallsHallIdNotasEvaluationIdRouteImport
+      parentRoute: typeof PanelHallsRouteRoute
+    }
     '/_panel/halls/$hallId/tareas/$taskId': {
       id: '/_panel/halls/$hallId/tareas/$taskId'
       path: '/$hallId/tareas/$taskId'
@@ -350,6 +370,7 @@ interface PanelHallsRouteRouteChildren {
   PanelHallsIndexRoute: typeof PanelHallsIndexRoute
   PanelHallsHallIdIndexRoute: typeof PanelHallsHallIdIndexRoute
   PanelHallsHallIdEvaluacionesEvaluationIdRoute: typeof PanelHallsHallIdEvaluacionesEvaluationIdRoute
+  PanelHallsHallIdNotasEvaluationIdRoute: typeof PanelHallsHallIdNotasEvaluationIdRoute
   PanelHallsHallIdTareasTaskIdRoute: typeof PanelHallsHallIdTareasTaskIdRoute
 }
 
@@ -358,6 +379,8 @@ const PanelHallsRouteRouteChildren: PanelHallsRouteRouteChildren = {
   PanelHallsHallIdIndexRoute: PanelHallsHallIdIndexRoute,
   PanelHallsHallIdEvaluacionesEvaluationIdRoute:
     PanelHallsHallIdEvaluacionesEvaluationIdRoute,
+  PanelHallsHallIdNotasEvaluationIdRoute:
+    PanelHallsHallIdNotasEvaluationIdRoute,
   PanelHallsHallIdTareasTaskIdRoute: PanelHallsHallIdTareasTaskIdRoute,
 }
 

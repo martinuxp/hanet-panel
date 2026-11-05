@@ -4,8 +4,8 @@ import { Button } from '@/components/arc/button/button'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { describeError } from '@/lib/errors'
 
-/** Pide confirmar algo que no se puede deshacer, como eliminar. */
-export function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, onConfirm, failure }: {
+/** Pide confirmar algo que no se puede deshacer, como eliminar o publicar. */
+export function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, onConfirm, failure, tone = 'danger' }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
@@ -14,6 +14,8 @@ export function ConfirmDialog({ open, onOpenChange, title, description, confirmL
   onConfirm: () => Promise<unknown>
   /** Qué decir si falla y el backend no explica por qué. */
   failure: string
+  /** `primary` para confirmar algo que no es destructivo, como publicar. */
+  tone?: 'danger' | 'primary'
 }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -38,7 +40,7 @@ export function ConfirmDialog({ open, onOpenChange, title, description, confirmL
           <Alert tone="danger" title="No se pudo completar" open={!!error}>{error}</Alert>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" disabled={busy} onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button variant="danger" loading={busy} onClick={confirm}>{confirmLabel}</Button>
+            <Button variant={tone} loading={busy} onClick={confirm}>{confirmLabel}</Button>
           </div>
         </div>
       </DialogContent>

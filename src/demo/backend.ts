@@ -8,7 +8,7 @@ const now = Date.now()
 const day = 86_400_000
 
 const institutions: AdminInstitution[] = [
-  { id: 'lch', name: 'LCH Temuco', fullName: 'Liceo Camilo Henríquez de Temuco', rosterCount: 1184, hasInviteCode: true, inviteUpdatedAt: now - 9 * day, logoUrl: null, bannerUrl: null, modules: ['feed', 'polls', 'alliances', 'electividad'] },
+  { id: 'lch', name: 'LCH Temuco', fullName: 'Liceo Camilo Henríquez de Temuco', rosterCount: 1184, hasInviteCode: true, inviteUpdatedAt: now - 9 * day, logoUrl: null, bannerUrl: null, modules: ['feed', 'polls', 'alliances', 'electividad', 'grades'] },
   { id: 'insuco', name: 'Insuco Padre Las Casas', fullName: 'Instituto Comercial de Padre Las Casas', rosterCount: 742, hasInviteCode: true, inviteUpdatedAt: now - 30 * day, logoUrl: null, bannerUrl: null },
   { id: 'araucania', name: 'Colegio Araucanía Verde', fullName: 'Colegio Araucanía Verde', rosterCount: 315, hasInviteCode: false, inviteUpdatedAt: null, logoUrl: null, bannerUrl: null },
   { id: 'pehuen', name: 'Colegio Valle Pehuén', fullName: 'Colegio Valle Pehuén', rosterCount: 0, hasInviteCode: false, inviteUpdatedAt: null, logoUrl: null, bannerUrl: null, modules: ['feed'] },
