@@ -100,7 +100,7 @@ function EvaluationPage() {
             {evaluation ? evaluation.title : 'Nueva evaluación'}
           </h1>
         </div>
-        {evaluation && (
+        {evaluation && data.hall.gradesOn !== false && (
           <Button variant="secondary" onClick={() => void navigate({ to: '/halls/$hallId/notas/$evaluationId', params: { hallId, evaluationId: evaluation.id } })}>
             <ClipboardList aria-hidden="true" className="size-4" /> {evaluation.gradesPublishedAt != null ? 'Ver notas' : 'Poner notas'}
           </Button>

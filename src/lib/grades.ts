@@ -10,7 +10,7 @@ export type GradeStatus = 'draft' | 'published'
 export type GradeStudent = {
   uid: string
   name: string
-  courseId: string
+  courseId: string | null
   grade: number | null
   status: GradeStatus | null
   seen: boolean

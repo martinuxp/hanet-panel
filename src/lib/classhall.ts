@@ -38,6 +38,8 @@ export type Hall = {
   code: string | null
   memberCount: number | null
   nextEvaluation?: { title: string; date: number } | null
+  /** Si la institución tiene el módulo Notas (solo en getHall). */
+  gradesOn?: boolean
 }
 
 export type HallAnnouncement = { id: string; body: string; authorName: string; createdAt: number | null; updatedAt: number | null }
