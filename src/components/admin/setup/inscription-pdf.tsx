@@ -2,6 +2,7 @@ import { Document, Font, Image, Page, Path, Svg, Text, View, StyleSheet, pdf } f
 import { renderSVG } from 'uqr'
 import { CITIES } from '@/lib/cities'
 import { MODULES, type AdminInstitution } from '@/lib/hnt-admin'
+import { urlToDataUrl } from '@/lib/data-url'
 
 // "Inscripción a HaNet": el PDF que entrega el asistente al generar el código
 // de invitación (mockup aprobado en https://claude.ai/artifact/AkaCT2a99zasKRa1mnj1U1).
@@ -95,23 +96,6 @@ async function qrPng(url: string) {
 }
 
 /** El escudo como PNG en memoria; si no se puede leer, el PDF va con las iniciales. */
-async function shieldPng(url: string | null) {
-  if (!url) return null
-  try {
-    const response = await fetch(url)
-    if (!response.ok) return null
-    const blob = await response.blob()
-    return await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(String(reader.result))
-      reader.onerror = () => reject(reader.error)
-      reader.readAsDataURL(blob)
-    })
-  } catch {
-    return null
-  }
-}
-
 function longDate(millis: number) {
   return new Date(millis).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })
 }
@@ -279,7 +263,7 @@ export async function downloadInscriptionPdf(data: InscriptionData) {
   registerFonts()
   const issuedAt = Date.now()
   const [shield, app, panel, docs] = await Promise.all([
-    shieldPng(data.institution.logoUrl),
+    urlToDataUrl(data.institution.logoUrl),
     qrPng('https://app.hanet.muxp.art'),
     qrPng('https://panel.hanet.muxp.art'),
     qrPng('https://docs.hanet.muxp.art/'),

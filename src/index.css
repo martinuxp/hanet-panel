@@ -30,6 +30,7 @@
     /* El extremo cálido de la tarjeta atardecer de la pantalla de cierre (Figma "[sunsetting beta error]"). */
     --hn-sunset: #ffbf33;
     --hn-border-glass: rgba(255, 255, 255, 0.15);
+    --hn-promo-ink: #0a0a0a;
     --hn-glow-top: #832768;
     --hn-glow-center: #d32b4c;
 
