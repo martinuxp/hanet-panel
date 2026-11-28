@@ -2,11 +2,9 @@ import { domToBlob } from 'modern-screenshot'
 import { zipSync } from 'fflate'
 import { flushSync } from 'react-dom'
 import { createRoot } from 'react-dom/client'
-import { PROMO_SLIDES, SLIDE_WIDTH, type PromoData } from './promo-slides'
+import { PROMO_SLIDES, type PromoData } from './promo-slides'
 
-const EXPORT_WIDTH = 1080
-
-/** Dibuja cada slide fuera de la pantalla y lo convierte en PNG de 1080 px de ancho. */
+/** Dibuja cada imagen fuera de la pantalla y la convierte en PNG del ancho de su red (1080 o 1920 px). */
 export async function renderPromoPngs(data: PromoData, ids?: string[]) {
   const host = document.createElement('div')
   host.setAttribute('aria-hidden', 'true')
@@ -20,7 +18,7 @@ export async function renderPromoPngs(data: PromoData, ids?: string[]) {
       const node = host.firstElementChild as HTMLElement
       await Promise.all([...node.querySelectorAll('img')].map(img => img.decode().catch(() => undefined)))
       await document.fonts.ready
-      const blob = await domToBlob(node, { scale: EXPORT_WIDTH / SLIDE_WIDTH, type: 'image/png' })
+      const blob = await domToBlob(node, { scale: slide.exportWidth / slide.width, type: 'image/png' })
       out.push({ id: slide.id, blob })
     }
   } finally {

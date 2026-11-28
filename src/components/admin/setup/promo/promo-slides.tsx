@@ -1,10 +1,12 @@
 import '@fontsource-variable/dm-sans/opsz.css'
 import type { CSSProperties, ReactNode } from 'react'
+import { renderSVG } from 'uqr'
 
-// Carrusel "Bienvenidos a HaNet" para redes (4:5), recreado del Figma de muxp
-// (archivo 16jIXkcIKhFJPnM38A7qUF, sección "Social new inst."). Se dibuja en
-// 914 × 1142 como en Figma y se exporta a 1080 × 1350. Por liceo cambian solo
-// el nombre corto y el escudo.
+// Imágenes "Bienvenidos a HaNet" para redes, recreadas del Figma de muxp
+// (archivo 16jIXkcIKhFJPnM38A7qUF, secciones "Social new inst." y "9:16 16:9").
+// Cada una se dibuja en el tamaño de Figma y se exporta al de la red: el
+// carrusel 4:5 a 1080 × 1350, la historia 9:16 a 1080 × 1920 y la 16:9 a
+// 1920 × 1080. Por liceo cambian solo el nombre corto y el escudo.
 
 export const SLIDE_WIDTH = 914
 export const SLIDE_HEIGHT = 1142
@@ -97,8 +99,129 @@ function WebPill({ style }: { style: CSSProperties }) {
   )
 }
 
-function Frame({ children }: { children: ReactNode }) {
-  return <div style={{ position: 'relative', width: W, height: H, overflow: 'hidden', background: 'var(--hn-promo-ink)' }}>{children}</div>
+function Frame({ width = W, height = H, children }: { width?: number; height?: number; children: ReactNode }) {
+  return <div style={{ position: 'relative', width, height, overflow: 'hidden', background: 'var(--hn-promo-ink)' }}>{children}</div>
+}
+
+function Shield({ name, shield, style }: PromoData & { style: CSSProperties }) {
+  return (
+    <Abs style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', ...style }}>
+      {shield
+        ? <img alt="" src={shield} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+        : <span style={{ ...OPSZ, fontSize: Number(style.height) * 0.38, fontWeight: 800, color: 'var(--hn-text-primary)' }}>{initials(name)}</span>}
+    </Abs>
+  )
+}
+
+/** HaNet × escudo, en chico (historia y 16:9). */
+function Duo({ left, top, ...data }: PromoData & { left: number; top: number }) {
+  return (
+    <>
+      <Abs style={{ left, top, width: 52, height: 76 }}><Img src="icon.svg" /></Abs>
+      <Abs style={{ left: left + 70, top: top + 31, width: 14, height: 14 }}><Img src="x.svg" /></Abs>
+      <Shield {...data} style={{ left: left + 102.36, top, width: 55.04, height: 75.85 }} />
+    </>
+  )
+}
+
+const QR_URL = 'https://app.hanet.muxp.art'
+const qrSrc = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderSVG(QR_URL, { border: 0, whiteColor: '#ffffff', blackColor: '#000000' }))}`
+
+function Qr({ size, radius, style }: { size: number; radius: number; style: CSSProperties }) {
+  return (
+    <Abs style={{ width: size, height: size, padding: size * 0.0652, background: '#ffffff', borderRadius: radius, ...style }}>
+      <img alt="" src={qrSrc} style={{ display: 'block', width: '100%', height: '100%' }} />
+    </Abs>
+  )
+}
+
+function InstallAt({ size, style }: { size: number; style: CSSProperties }) {
+  return (
+    <Abs style={{ ...OPSZ, transform: 'translateY(-50%)', fontSize: size, fontWeight: 700, lineHeight: 0.783, letterSpacing: -0.09 * size, whiteSpace: 'pre', color: 'var(--hn-text-primary)', ...style }}>
+      <p style={{ margin: 0 }}>Instala</p>
+      <p style={{ margin: 0 }}>HaNet en</p>
+      <p style={{ margin: 0, color: 'var(--hn-accent)' }}>app.hanet.muxp.art</p>
+    </Abs>
+  )
+}
+
+function Hello({ name, max, style }: { name: string; max: number; style: CSSProperties }) {
+  const hello = `¡Hola ${name}!`
+  // 48 px caben unos `max` caracteres; si el nombre es más largo, se achica.
+  const size = hello.length > max ? Math.max(28, Math.round(48 * max / hello.length)) : 48
+  return <Abs style={{ ...OPSZ, fontSize: size, lineHeight: 'normal', letterSpacing: -0.07 * size, whiteSpace: 'nowrap', color: 'var(--hn-text-primary)', ...style }}>{hello}</Abs>
+}
+
+function BigWelcome({ style }: { style: CSSProperties }) {
+  return (
+    <Abs style={{ ...OPSZ, fontSize: 128, fontWeight: 800, lineHeight: 0.783, letterSpacing: -11.52, whiteSpace: 'nowrap', color: 'var(--hn-text-primary)', ...style }}>
+      <p style={{ margin: 0 }}>Bienvenidos</p>
+      <p style={{ margin: 0 }}>a <span style={{ color: 'var(--hn-accent)' }}>HaNet</span></p>
+    </Abs>
+  )
+}
+
+function Tagline({ style }: { style: CSSProperties }) {
+  return (
+    <Abs style={{ ...OPSZ, width: 653, fontSize: 33, lineHeight: 0.941, letterSpacing: -2.64, color: 'var(--hn-text-primary)', ...style }}>
+      La app para <b style={{ fontWeight: 700 }}>estudiantes</b> que te mantiene al día con tu institución.
+    </Abs>
+  )
+}
+
+const PHONE = { width: 453, height: 912 }
+function Phones({ back, front }: { back: [number, number]; front: [number, number] }) {
+  return (
+    <>
+      <Abs style={{ left: back[0] - 30, top: back[1] - 30, ...PHONE }}><Img src="phone-1a.webp" /></Abs>
+      <Abs style={{ left: front[0] - 30, top: front[1] - 30, ...PHONE, filter: 'drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25))' }}><Img src="phone-1b.webp" /></Abs>
+    </>
+  )
+}
+
+const STORY = { width: 914, height: 1624 }
+const WIDE = { width: 1528, height: 860 }
+
+/** Historia 9:16: luz rosa arriba y abajo, todo centrado. */
+function Story(data: PromoData) {
+  const { width: SW, height: SH } = STORY
+  return (
+    <Frame {...STORY}>
+      <Rotated left={-985.16} top={SH * 0.6 + 54.49} width={2045.646} height={1477.445} transform="rotate(-155.14deg) scaleY(-1) skewX(-4.22deg)" innerWidth={1817.36} innerHeight={816.241} inset="-42.52% -19.1%" src="story-blob-30.svg" />
+      <Rotated left={-1188} top={SH * 0.2 + 304.2} width={2718.866} height={2351.929} transform="rotate(-149.05deg) scaleY(-0.99) skewX(-5.73deg)" innerWidth={2037.483} innerHeight={1626.211} inset="-21.34% -17.04%" src="story-blob-29.svg" />
+      <Rotated left={-1015.81} top={SH * 0.4 + 40.59} width={2629.814} height={2094.971} transform="rotate(-155.14deg) scaleY(-1) skewX(-4.22deg)" innerWidth={2174.803} innerHeight={1350.878} inset="-25.69% -15.96%" src="story-blob-28.svg" />
+      <Rotated left={-192.61} top={-1000.3} width={2034.663} height={1300.65} transform="rotate(17.33deg) scaleY(-1) skewX(-4.22deg)" innerWidth={1817.36} innerHeight={816.241} inset="-42.52% -19.1%" src="story-blob-31.svg" />
+      <Rotated left={-643.71} top={-1484.47} width={2661.83} height={2229.983} transform="rotate(23.42deg) scaleY(-0.99) skewX(-5.73deg)" innerWidth={2037.483} innerHeight={1626.211} inset="-21.34% -17.04%" src="story-blob-32.svg" />
+      <Rotated left={-716.67} top={-1238.25} width={2572.269} height={1904.407} transform="rotate(17.33deg) scaleY(-1) skewX(-4.22deg)" innerWidth={2174.803} innerHeight={1350.878} inset="-25.69% -15.96%" src="story-blob-33.svg" />
+      <Phones back={[162, SH * 0.4 + 201.4]} front={[SW * 0.2 + 176.2, SH * 0.6 + 149.6]} />
+      <Hello name={data.name} max={30} style={{ left: SW / 2, top: 249, transform: 'translateX(-50%)' }} />
+      <BigWelcome style={{ left: SW / 2 + 0.5, top: 327, transform: 'translateX(-50%)', textAlign: 'center' }} />
+      <Duo {...data} left={SW * 0.4 + 12.4} top={157} />
+      <Tagline style={{ left: SW / 2 + 0.5, top: SH * 0.2 + 218.2, transform: 'translateX(-50%)', textAlign: 'center' }} />
+      <InstallAt size={32} style={{ left: SW * 0.6 + 36.6, top: SH * 0.6 + 84.1 }} />
+      <Qr size={125} radius={10} style={{ left: 585, top: 887 }} />
+    </Frame>
+  )
+}
+
+/** 16:9 (pantallas, web del liceo, YouTube): texto a la derecha, QR y teléfonos a la izquierda. */
+function Wide(data: PromoData) {
+  const { width: WW, height: WH } = WIDE
+  return (
+    <Frame {...WIDE}>
+      <Rotated left={-493.85} top={WH * 0.2 + 126.89} width={1867.289} height={1477.445} transform="rotate(-153.09deg) scaleY(-1)" innerWidth={1688} innerHeight={800} inset="-43.39% -20.56%" src="blob-30.svg" />
+      <Rotated left={-679} top={-101} width={2481.811} height={2351.929} transform="rotate(-146.7deg) scaleY(-1) skewX(-0.91deg)" innerWidth={1908.422} innerHeight={1577.081} inset="-22.01% -18.19%" src="blob-29.svg" />
+      <Rotated left={-521.83} top={-39.81} width={2400.524} height={2094.971} transform="rotate(-153.09deg) scaleY(-1)" innerWidth={2020} innerHeight={1324} inset="-26.22% -17.18%" src="blob-28.svg" />
+      <BigWelcome style={{ right: WW - 1430, top: WH * 0.2 + 110, textAlign: 'right' }} />
+      <Hello name={data.name} max={30} style={{ right: WW - 1430, top: 200, textAlign: 'right' }} />
+      <Tagline style={{ right: WW - 1430, top: WH * 0.6 - 14, textAlign: 'right' }} />
+      <Phones back={[100, WH * 0.4 + 132]} front={[WW * 0.2 + 76.4, WH * 0.8 + 17]} />
+      <Duo {...data} left={WW * 0.8 + 50.6} top={WH * 0.6 + 68} />
+      <Abs style={{ left: 100, top: 100, width: 177, height: 67 }}><Img src="logotype.svg" /></Abs>
+      <Qr size={157} radius={0} style={{ left: 100, top: 243 }} />
+      <InstallAt size={40} style={{ left: 277, top: WH * 0.2 + 181.5 }} />
+    </Frame>
+  )
 }
 
 function initials(name: string) {
@@ -121,11 +244,7 @@ function Welcome({ name, shield }: PromoData) {
       </Abs>
       <Abs style={{ left: 625, top: 577, width: 79, height: 117 }}><Img src="icon.svg" /></Abs>
       <Abs style={{ left: 732, top: 630, width: 9, height: 9 }}><Img src="x.svg" /></Abs>
-      <Abs style={{ left: 769.29, top: 577, width: 84.74, height: 116.76, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {shield
-          ? <img alt="" src={shield} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-          : <span style={{ ...OPSZ, fontSize: 40, fontWeight: 800, color: 'var(--hn-text-primary)' }}>{initials(name)}</span>}
-      </Abs>
+      <Shield name={name} shield={shield} style={{ left: 769.29, top: 577, width: 84.74, height: 116.76 }} />
       <WebPill style={{ right: W - 854, top: 771 }} />
       <Logotype />
       <NextButton left={728} />
@@ -202,10 +321,17 @@ function Closing() {
   )
 }
 
-export const PROMO_SLIDES: { id: string; label: string; render: (data: PromoData) => ReactNode }[] = [
-  { id: '1-bienvenidos', label: 'Bienvenidos', render: data => <Welcome {...data} /> },
-  { id: '2-instala', label: 'Instala HaNet', render: data => <Install {...data} /> },
-  { id: '3-hanet-id', label: 'Crea tu HaNet ID', render: () => <CreateId /> },
-  { id: '4-listo', label: '¡Y listo!', render: data => <Done {...data} /> },
-  { id: '5-cierre', label: 'Cierre', render: () => <Closing /> },
+export type PromoFormat = '4:5' | '9:16' | '16:9'
+export type PromoSlide = { id: string; label: string; format: PromoFormat; width: number; height: number; exportWidth: number; render: (data: PromoData) => ReactNode }
+
+const CAROUSEL = { format: '4:5' as const, width: W, height: H, exportWidth: 1080 }
+
+export const PROMO_SLIDES: PromoSlide[] = [
+  { id: '1-bienvenidos', label: 'Bienvenidos', ...CAROUSEL, render: data => <Welcome {...data} /> },
+  { id: '2-instala', label: 'Instala HaNet', ...CAROUSEL, render: data => <Install {...data} /> },
+  { id: '3-hanet-id', label: 'Crea tu HaNet ID', ...CAROUSEL, render: () => <CreateId /> },
+  { id: '4-listo', label: '¡Y listo!', ...CAROUSEL, render: data => <Done {...data} /> },
+  { id: '5-cierre', label: 'Cierre', ...CAROUSEL, render: () => <Closing /> },
+  { id: 'historia', label: 'Historia', format: '9:16', ...STORY, exportWidth: 1080, render: data => <Story {...data} /> },
+  { id: 'horizontal', label: 'Horizontal', format: '16:9', ...WIDE, exportWidth: 1920, render: data => <Wide {...data} /> },
 ]
