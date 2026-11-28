@@ -138,9 +138,9 @@ function Qr({ size, radius, style }: { size: number; radius: number; style: CSSP
 function InstallAt({ size, style }: { size: number; style: CSSProperties }) {
   return (
     <Abs style={{ ...OPSZ, transform: 'translateY(-50%)', fontSize: size, fontWeight: 700, lineHeight: 0.783, letterSpacing: -0.09 * size, whiteSpace: 'pre', color: 'var(--hn-text-primary)', ...style }}>
-      <p style={{ margin: 0 }}>Instala</p>
-      <p style={{ margin: 0 }}>HaNet en</p>
-      <p style={{ margin: 0, color: 'var(--hn-accent)' }}>app.hanet.muxp.art</p>
+      <div>Instala</div>
+      <div>HaNet en</div>
+      <div style={{ color: 'var(--hn-accent)' }}>app.hanet.muxp.art</div>
     </Abs>
   )
 }
@@ -155,8 +155,8 @@ function Hello({ name, max, style }: { name: string; max: number; style: CSSProp
 function BigWelcome({ style }: { style: CSSProperties }) {
   return (
     <Abs style={{ ...OPSZ, fontSize: 128, fontWeight: 800, lineHeight: 0.783, letterSpacing: -11.52, whiteSpace: 'nowrap', color: 'var(--hn-text-primary)', ...style }}>
-      <p style={{ margin: 0 }}>Bienvenidos</p>
-      <p style={{ margin: 0 }}>a <span style={{ color: 'var(--hn-accent)' }}>HaNet</span></p>
+      <div>Bienvenidos</div>
+      <div>a <span style={{ color: 'var(--hn-accent)' }}>HaNet</span></div>
     </Abs>
   )
 }
@@ -164,7 +164,7 @@ function BigWelcome({ style }: { style: CSSProperties }) {
 function Tagline({ style }: { style: CSSProperties }) {
   return (
     <Abs style={{ ...OPSZ, width: 653, fontSize: 33, lineHeight: 0.941, letterSpacing: -2.64, color: 'var(--hn-text-primary)', ...style }}>
-      La app para <b style={{ fontWeight: 700 }}>estudiantes</b> que te mantiene al día con tu institución.
+      La app para <span style={{ fontWeight: 700 }}>estudiantes</span> que te mantiene al día con tu institución.
     </Abs>
   )
 }
@@ -236,11 +236,11 @@ function Welcome({ name, shield }: PromoData) {
       <Background icon="tilted" />
       <Abs style={{ ...OPSZ, right: W - 854, top: 188, fontSize: helloSize, lineHeight: 'normal', letterSpacing: -3.36 * helloSize / 48, whiteSpace: 'nowrap', textAlign: 'right', color: 'var(--hn-text-primary)' }}>{hello}</Abs>
       <Abs style={{ ...OPSZ, right: W - 854, top: H * 0.2 + 21.6, fontSize: 128, fontWeight: 800, lineHeight: 0.783, letterSpacing: -11.52, whiteSpace: 'nowrap', textAlign: 'right', color: 'var(--hn-text-primary)' }}>
-        <p style={{ margin: 0 }}>Bienvenidos</p>
-        <p style={{ margin: 0 }}>a <span style={{ color: 'var(--hn-accent)' }}>HaNet</span></p>
+        <div>Bienvenidos</div>
+        <div>a <span style={{ color: 'var(--hn-accent)' }}>HaNet</span></div>
       </Abs>
       <Abs style={{ ...OPSZ, right: W - 854, top: H * 0.4 + 15.2, width: 653, fontSize: 33, lineHeight: 0.941, letterSpacing: -2.64, textAlign: 'right', color: 'var(--hn-text-primary)' }}>
-        La app para <b style={{ fontWeight: 700 }}>estudiantes</b> que te mantiene al día con tu institución.
+        La app para <span style={{ fontWeight: 700 }}>estudiantes</span> que te mantiene al día con tu institución.
       </Abs>
       <Abs style={{ left: 625, top: 577, width: 79, height: 117 }}><Img src="icon.svg" /></Abs>
       <Abs style={{ left: 732, top: 630, width: 9, height: 9 }}><Img src="x.svg" /></Abs>
@@ -263,9 +263,9 @@ function Install({ name }: PromoData) {
       <NextButton left={728} />
       <StepTitle step={1}>Instala HaNet</StepTitle>
       <Body width={690} tracking={-2.88}>
-        <p style={{ margin: 0 }}>Ahora <b style={{ fontWeight: 600 }}>{name} usa HaNet</b> para avisos, calendario de pruebas, material de clases, horarios y más.</p>
-        <p style={{ margin: 0 }}>&nbsp;</p>
-        <p style={{ margin: 0 }}>Entra a <b style={{ fontWeight: 700 }}>app.hanet.muxp.art</b> desde tu teléfono y agrégala a tu pantalla de inicio.</p>
+        <div>Ahora <span style={{ fontWeight: 600 }}>{name} usa HaNet</span> para avisos, calendario de pruebas, material de clases, horarios y más.</div>
+        <div>&nbsp;</div>
+        <div>Entra a <span style={{ fontWeight: 700 }}>app.hanet.muxp.art</span> desde tu teléfono y agrégala a tu pantalla de inicio.</div>
       </Body>
     </Frame>
   )
@@ -279,8 +279,8 @@ function CreateId() {
       <Logotype />
       <NextButton left={728} />
       <Body width={714} tracking={-1.44}>
-        <p style={{ margin: 0 }}>Ingresa tus datos y verifica tu correo. Después escribe el <b style={{ fontWeight: 700 }}>código de invitación de 4 palabras</b> de tu institución y confirma con tu correo institucional.</p>
-        <p style={{ margin: 0 }}>(¡Nunca publiques el código en redes!)</p>
+        <div>Ingresa tus datos y verifica tu correo. Después escribe el <span style={{ fontWeight: 700 }}>código de invitación de 4 palabras</span> de tu institución y confirma con tu correo institucional.</div>
+        <div>(¡Nunca publiques el código en redes!)</div>
       </Body>
       <StepTitle step={2}>Crea tu HaNet ID</StepTitle>
       <Abs style={{ left: 565, top: 584, width: 289, height: 102 }}><Img src="code-pills.svg" /></Abs>
@@ -300,11 +300,11 @@ function Done({ name }: PromoData) {
       <Logotype />
       <NextButton left={60} />
       <Body width={736} tracking={-1.44}>
-        <p style={{ margin: 0 }}>Ya puedes comenzar a descubrir todo lo que tiene {name} y HaNet para ti.</p>
-        <p style={{ margin: 0 }}>&nbsp;</p>
-        <p style={{ margin: 0 }}>¿Tienes dudas? Escríbenos en @hanetcl, muxp@muxp.art o entra a docs.hanet.muxp.art.</p>
-        <p style={{ margin: 0 }}>&nbsp;</p>
-        <p style={{ margin: 0 }}>¡Disfruta HaNet!</p>
+        <div>Ya puedes comenzar a descubrir todo lo que tiene {name} y HaNet para ti.</div>
+        <div>&nbsp;</div>
+        <div>¿Tienes dudas? Escríbenos en @hanetcl, muxp@muxp.art o entra a docs.hanet.muxp.art.</div>
+        <div>&nbsp;</div>
+        <div>¡Disfruta HaNet!</div>
       </Body>
       <StepTitle step={3}>¡Y listo!</StepTitle>
     </Frame>
